@@ -12,7 +12,7 @@ def load_data(args):
         normalization_method=args.normalization_method
     )
     loaders = data.load()
-    return loaders
+    return loaders 
 
 def main():
     args = get_args()
