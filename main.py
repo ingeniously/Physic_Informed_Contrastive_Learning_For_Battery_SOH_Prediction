@@ -68,32 +68,31 @@ def main():
 
 def get_args():
     parser = argparse.ArgumentParser('Hyper Parameters')
-    parser.add_argument('--csv_file', type=str, required=True, help='Path to CSV file (unique source)')
-    parser.add_argument('--batch_size', type=int, default=256, help='batch size')
+    parser.add_argument('--csv_file', type=str, required=True, help='Path to CSV file')
+    parser.add_argument('--batch_size', type=int, default=128, help='batch size')
     parser.add_argument('--normalization_method', type=str, default='z-score', help='min-max,z-score')
-
-    # scheduler related
-    parser.add_argument('--epochs', type=int, default=200, help='epoch')
-    parser.add_argument('--early_stop', type=int, default=20, help='early stop')
-    parser.add_argument('--warmup_epochs', type=int, default=30, help='warmup epoch')
-    parser.add_argument('--warmup_lr', type=float, default=0.002, help='warmup lr')
-    parser.add_argument('--lr', type=float, default=0.01, help='base lr')
-    parser.add_argument('--final_lr', type=float, default=0.0002, help='final lr')
-    parser.add_argument('--lr_F', type=float, default=0.001, help='lr of F')
-
-    # model related
-    parser.add_argument('--F_layers_num', type=int, default=3, help='the layers num of F')
-    parser.add_argument('--F_hidden_dim', type=int, default=60, help='the hidden dim of F')
-
-    # loss related
-    parser.add_argument('--alpha', type=float, default=0.7, help='loss = l_data + alpha * l_PDE + beta * l_physics')
-    parser.add_argument('--beta', type=float, default=0.2, help='loss = l_data + alpha * l_PDE + beta * l_physics')
-
-    parser.add_argument('--log_dir', type=str, default='text log.txt', help='log dir, if None, do not save')
+    
+    # More conservative learning parameters
+    parser.add_argument('--epochs', type=int, default=300, help='epoch')
+    parser.add_argument('--early_stop', type=int, default=30, help='early stop')
+    parser.add_argument('--warmup_epochs', type=int, default=50, help='warmup epoch')
+    parser.add_argument('--warmup_lr', type=float, default=0.0001, help='warmup lr')  # Reduced
+    parser.add_argument('--lr', type=float, default=0.001, help='base lr')  # Reduced
+    parser.add_argument('--final_lr', type=float, default=0.00001, help='final lr')  # Reduced
+    parser.add_argument('--lr_F', type=float, default=0.0005, help='lr of F')  # Reduced
+    
+    # Increased model capacity
+    parser.add_argument('--F_layers_num', type=int, default=4, help='the layers num of F')
+    parser.add_argument('--F_hidden_dim', type=int, default=128, help='the hidden dim of F')
+    
+    # Adjusted loss weights
+    parser.add_argument('--alpha', type=float, default=1.0, help='PDE loss weight')
+    parser.add_argument('--beta', type=float, default=0.5, help='physics constraint weight')
+    
+    parser.add_argument('--log_dir', type=str, default='training_log.txt', help='log dir')
     parser.add_argument('--save_folder', type=str, default='results', help='save folder')
-
-    args = parser.parse_args()
-    return args
+    
+    return parser.parse_args()
 
 if __name__ == '__main__':
     main()

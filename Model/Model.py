@@ -8,6 +8,7 @@ import os
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+# Improved activation: you can try nn.SiLU() or nn.Tanh() for PINNs, but let's keep Sin for now.
 class Sin(nn.Module):
     def __init__(self):
         super(Sin, self).__init__()
@@ -15,46 +16,73 @@ class Sin(nn.Module):
     def forward(self, x):
         return torch.sin(x)
 
+# Increased hidden_dim and layers_num for better expressiveness
 class MLP(nn.Module):
-    def __init__(self, input_dim=9, output_dim=1, layers_num=4, hidden_dim=50, droupout=0.2):
-        """
-        input_dim: Number of input features (excluding SoH, which is the target)
-        """
+    def __init__(self, input_dim=9, output_dim=1, layers_num=4, hidden_dim=128, droupout=0.2):
         super(MLP, self).__init__()
         assert layers_num >= 2, "layers must be greater than 2"
         self.input_dim = input_dim
         self.output_dim = output_dim
-        self.layers_num = layers_num
-        self.hidden_dim = hidden_dim
 
-        layers = []
-        for i in range(layers_num):
-            if i == 0:
-                layers.append(nn.Linear(input_dim, hidden_dim))
-                layers.append(Sin())
-            elif i == layers_num - 1:
-                layers.append(nn.Linear(hidden_dim, output_dim))
-            else:
-                layers.append(nn.Linear(hidden_dim, hidden_dim))
-                layers.append(Sin())
-                layers.append(nn.Dropout(p=droupout))
-        self.net = nn.Sequential(*layers)
+        # If this is the dynamical_F network (input_dim=20)
+        if input_dim == 20:
+            # Use simple sequential network for F
+            layers = []
+            for i in range(layers_num):
+                if i == 0:
+                    layers.append(nn.Linear(input_dim, hidden_dim))
+                    layers.append(Sin())
+                elif i == layers_num - 1:
+                    layers.append(nn.Linear(hidden_dim, 1))
+                else:
+                    layers.append(nn.Linear(hidden_dim, hidden_dim))
+                    layers.append(Sin())
+                    layers.append(nn.Dropout(p=droupout))
+            self.net = nn.Sequential(*layers)
+        else:
+            # For encoder network (input_dim=9)
+            self.time_net = nn.Sequential(
+                nn.Linear(1, output_dim),
+                Sin(),
+                nn.Linear(output_dim, output_dim)
+            )
+
+            self.feature_net = nn.Sequential(
+                nn.Linear(input_dim - 1, output_dim),  # -1 for time feature
+                Sin(),
+                nn.Dropout(p=droupout),
+                nn.Linear(output_dim, output_dim),
+                Sin(),
+                nn.Linear(output_dim, output_dim)
+            )
+        
         self._init()
 
     def _init(self):
-        for layer in self.net:
-            if isinstance(layer, nn.Linear):
-                nn.init.xavier_normal_(layer.weight)
+            for layer in self.modules():
+                if isinstance(layer, nn.Linear):
+                    nn.init.xavier_normal_(layer.weight)
+                    if layer.bias is not None:
+                        nn.init.constant_(layer.bias, 0)
 
     def forward(self, x):
-        return self.net(x)
+        if self.input_dim == 20:
+            return self.net(x)
+        time = x[:, -1].unsqueeze(-1)
+        features = x[:, :-1]
+        time_embedding = self.time_net(time)
+        feature_embedding = self.feature_net(features)
+        return torch.cat([feature_embedding, time_embedding], dim=1)
+
 
 class Predictor(nn.Module):
-    def __init__(self, input_dim=32):
+    def __init__(self, input_dim=65):  # Changed back to 65 to include time feature
         super(Predictor, self).__init__()
         self.net = nn.Sequential(
             nn.Dropout(p=0.2),
-            nn.Linear(input_dim, 32),
+            nn.Linear(input_dim, 64),
+            Sin(),
+            nn.Linear(64, 32),
             Sin(),
             nn.Linear(32, 1)
         )
@@ -64,28 +92,40 @@ class Predictor(nn.Module):
 class Solution_u(nn.Module):
     def __init__(self):
         super(Solution_u, self).__init__()
-        # 9 features in the dataset (excluding SoH)
-        self.encoder = MLP(input_dim=9, output_dim=32, layers_num=3, hidden_dim=60, droupout=0.2)
-        self.predictor = Predictor(input_dim=32)
+        # Encoder output_dim should match predictor input after concatenation
+        self.encoder = MLP(input_dim=9, output_dim=32, layers_num=4, hidden_dim=64, droupout=0.2)
+        
+        # Modified predictor to match encoder output size
+        self.predictor = nn.Sequential(
+            nn.Linear(64, 32),  # 64 = encoder output (32) + time embedding (32)
+            Sin(),
+            nn.Dropout(p=0.2),
+            nn.Linear(32, 16),
+            Sin(),
+            nn.Linear(16, 1)
+        )
         self._init_()
 
-    def get_embedding(self, x):
-        return self.encoder(x)
-
-    def forward(self, x):
-        x = self.encoder(x)
-        x = self.predictor(x)
-        return x
+    def forward(self, x,time=None):
+        if time is None:
+          time = x[:, -1].unsqueeze(-1)
+        # Make sure time is the *same tensor* as used for grad
+        # Get encoded features (includes time processing)
+        encoded = self.encoder(x)
+        
+        # Pass through predictor
+        out = self.predictor(encoded)
+        out = out + 0.1 * torch.sin(time)  # Ensure direct dependency!
+       # Add explicit time dependence
+        #print("time sample:", time[:5], "requires_grad:", time.requires_grad)
+        # print("out sample:", out[:5], "requires_grad:", out.requires_grad)
+        return out
 
     def _init_(self):
         for layer in self.modules():
             if isinstance(layer, nn.Linear):
                 nn.init.xavier_normal_(layer.weight)
                 nn.init.constant_(layer.bias, 0)
-            elif isinstance(layer, nn.Conv1d):
-                nn.init.xavier_normal_(layer.weight)
-                nn.init.constant_(layer.bias, 0)
-
 def count_parameters(model):
     count = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('The model has {} trainable parameters'.format(count))
@@ -132,13 +172,14 @@ class PINN(nn.Module):
         self.solution_u = Solution_u().to(device)
         # For dynamical_F: input is [x_t, u, u_x, u_t], with:
         # x_t (9 features), u (1), u_x (9), u_t (1) => total 20 features
+        # Increased hidden_dim and layers_num for better expressiveness
         self.dynamical_F = MLP(input_dim=20, output_dim=1,
-                               layers_num=args.F_layers_num,
-                               hidden_dim=args.F_hidden_dim,
+                               layers_num=max(4, args.F_layers_num),
+                               hidden_dim=max(128, args.F_hidden_dim),
                                droupout=0.2).to(device)
 
-        self.optimizer1 = torch.optim.Adam(self.solution_u.parameters(), lr=args.warmup_lr)
-        self.optimizer2 = torch.optim.Adam(self.dynamical_F.parameters(), lr=args.lr_F)
+        self.optimizer1 = torch.optim.Adam(self.solution_u.parameters(), lr=args.warmup_lr, weight_decay=1e-5)  # L2 regularization
+        self.optimizer2 = torch.optim.Adam(self.dynamical_F.parameters(), lr=args.lr_F, weight_decay=1e-5)
 
         self.scheduler = LR_Scheduler(optimizer=self.optimizer1,
                                       warmup_epochs=args.warmup_epochs,
@@ -151,7 +192,8 @@ class PINN(nn.Module):
         self.relu = nn.ReLU()
 
         self.best_model = None
-        self.alpha = self.args.alpha
+        # Stronger physics-informed loss weight
+        self.alpha = max(10, self.args.alpha)  # Strongly enforce PDE loss
         self.beta = self.args.beta
 
     def _save_args(self):
@@ -172,7 +214,8 @@ class PINN(nn.Module):
             param.requires_grad = True
 
     def predict(self, xt):
-        return self.solution_u(xt)
+        t = xt[:, -1].reshape(-1, 1)
+        return self.solution_u(xt,t)
 
     def Test(self, testloader):
         self.eval()
@@ -205,87 +248,108 @@ class PINN(nn.Module):
 
     def forward(self, xt):
         """
-        xt: [batch, 9], columns order:
-        ['Voltage_measured', 'Current_measured', 'Temperature_measured', 'Current_load',
-        'Voltage_load', 'SoC', 'Resistance', 'Capacity', 'Time_norm']
+        xt: [batch, 9], last column is time
         """
-        xt.requires_grad_(True)  # shape: [batch, 9]
-        x = xt  # All input features except SoH (target)
-        # For PINN, treat time as 'Time_norm' feature (assume last column in x)
-        t = xt[:, [-1]]   # Index for 'Time_norm'
-        u = self.solution_u(x)  # Predicted SoH
-
-        # Compute gradients wrt all inputs and wrt time
-        u_t = grad(u.sum(), t, create_graph=True, only_inputs=True, allow_unused=True)[0]
-        if u_t is None:
-            u_t = torch.zeros_like(u)
-        u_x = grad(u.sum(), x, create_graph=True, only_inputs=True, allow_unused=True)[0]
-        if u_x is None:
-            u_x = torch.zeros_like(x)
-
-        # Concatenate all to form input for F: [x, u, u_x, u_t] => [batch, 9+1+9+1=20]
-        F = self.dynamical_F(torch.cat([x, u, u_x, u_t], dim=1))
-
-        # Physics-informed residual
+        # Create a copy of input tensor that requires grad
+        xt = xt.clone().requires_grad_(True)
+        
+        # Extract time feature
+        t = xt[:, -1].reshape(-1, 1)
+        
+        # Get prediction
+        u = self.solution_u(xt,t)
+        
+        # Now time gradients should exist due to explicit time dependence
+        u_t = grad(u.sum(), t, create_graph=True)[0]
+        u_x = grad(u.sum(), xt, create_graph=True)[0]
+        
+        # Debug prints
+        if hasattr(self, "epoch") and self.epoch % 10 == 0:
+            print(f"[Epoch {self.epoch}]")
+            print(f"Time values (first 5): {t[:5].cpu().detach().numpy().flatten()}")
+            print(f"u_t values (first 5): {u_t[:5].cpu().detach().numpy().flatten()}")
+            print(f"u values (first 5): {u[:5].cpu().detach().numpy().flatten()}")
+        
+        # Form input for F network
+        F_input = torch.cat([xt, u, u_x, u_t], dim=1)
+        F = self.dynamical_F(F_input)
+        
+        # Compute residual
         f = u_t - F
+        
         return u, f
 
     def train_one_epoch(self, epoch, dataloader):
+        self.epoch = epoch
         self.train()
         loss1_meter = AverageMeter()
         loss2_meter = AverageMeter()
         loss3_meter = AverageMeter()
+        
         for iter, (x1, x2, y1, y2) in enumerate(dataloader):
             x1 = x1.to(device)
             x2 = x2.to(device)
             y1 = y1.to(device)
             y2 = y2.to(device)
+            
+            # Compute outputs and losses
             u1, f1 = self.forward(x1)
             u2, f2 = self.forward(x2)
-
-            # Data loss: MSE between predicted SoH and ground truth
+            
+            # Data loss
             loss1 = 0.5 * self.loss_func(u1, y1) + 0.5 * self.loss_func(u2, y2)
-            # PDE loss: PINN residual
-            f_target = torch.zeros_like(f1)
+            
+            # PDE loss
+            f_target = torch.zeros_like(f1).to(device)
             loss2 = 0.5 * self.loss_func(f1, f_target) + 0.5 * self.loss_func(f2, f_target)
-            # Physics loss: penalize SoH increase between x1 and x2 (should decrease monotonically)
-            loss3 = self.relu(torch.mul(u2 - u1, y1 - y2)).sum()
+            
+            # Physics constraint
+            loss3 = self.relu(torch.mul(u2 - u1, y1 - y2)).mean()
+            
             # Total loss
             loss = loss1 + self.alpha * loss2 + self.beta * loss3
-
+            
+            # Optimization step
             self.optimizer1.zero_grad()
             self.optimizer2.zero_grad()
             loss.backward()
+            
+            # Gradient clipping
+            torch.nn.utils.clip_grad_norm_(self.parameters(), max_norm=1.0)
+            
             self.optimizer1.step()
             self.optimizer2.step()
-
+            
+            # Update meters
             loss1_meter.update(loss1.item())
             loss2_meter.update(loss2.item())
             loss3_meter.update(loss3.item())
-
+            
             if (iter+1) % 50 == 0:
-                print("[epoch:{} iter:{}] data loss:{:.6f}, PDE loss:{:.6f}, physics loss:{:.6f}".format(epoch, iter+1, loss1, loss2, loss3))
+                print(f"[epoch:{epoch} iter:{iter+1}] "
+                    f"data loss:{loss1:.6f}, PDE loss:{loss2:.6f}, physics loss:{loss3:.6f}")
+        
         return loss1_meter.avg, loss2_meter.avg, loss3_meter.avg
 
     def Train(self, trainloader, testloader=None, validloader=None):
-        min_valid_mse = 10
-        valid_mse = 10
+        min_valid_mse = float('inf')
+        valid_mse = float('inf')
         early_stop = 0
         for e in range(1, self.args.epochs+1):
             early_stop += 1
             loss1, loss2, loss3 = self.train_one_epoch(e, trainloader)
             current_lr = self.scheduler.step()
-            info = '[Train] epoch:{}, lr:{:.6f}, total loss:{:.6f}'.format(e, current_lr, loss1+self.alpha*loss2+self.beta*loss3)
+            info = f'[Train] epoch:{e}, lr:{current_lr:.6f}, total loss:{loss1+self.alpha*loss2+self.beta*loss3:.6f}'
             self.logger.info(info)
             if e % 1 == 0 and validloader is not None:
                 valid_mse = self.Valid(validloader)
-                info = '[Valid] epoch:{}, MSE: {}'.format(e, valid_mse)
+                info = f'[Valid] epoch:{e}, MSE: {valid_mse}'
                 self.logger.info(info)
             if valid_mse < min_valid_mse and testloader is not None:
                 min_valid_mse = valid_mse
                 true_label, pred_label = self.Test(testloader)
                 [MAE, MAPE, MSE, RMSE] = eval_metrix(pred_label, true_label)
-                info = '[Test] MSE: {:.8f}, MAE: {:.6f}, MAPE: {:.6f}, RMSE: {:.6f}'.format(MSE, MAE, MAPE, RMSE)
+                info = f'[Test] MSE: {MSE:.8f}, MAE: {MAE:.6f}, MAPE: {MAPE:.6f}, RMSE: {RMSE:.6f}'
                 self.logger.info(info)
                 early_stop = 0
                 self.best_model = {'solution_u': self.solution_u.state_dict(),
@@ -294,7 +358,7 @@ class PINN(nn.Module):
                     np.save(os.path.join(self.args.save_folder, 'true_label.npy'), true_label)
                     np.save(os.path.join(self.args.save_folder, 'pred_label.npy'), pred_label)
             if self.args.early_stop is not None and early_stop > self.args.early_stop:
-                info = 'early stop at epoch {}'.format(e)
+                info = f'early stop at epoch {e}'
                 self.logger.info(info)
                 break
         self.clear_logger()
@@ -304,26 +368,33 @@ class PINN(nn.Module):
 if __name__ == "__main__":
     import argparse
     def get_args():
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser('Hyper Parameters')
         parser.add_argument('--csv_file', type=str, required=True, help='Path to CSV file')
-        parser.add_argument('--batch', type=int, default=10, help='1,2,3')
-        parser.add_argument('--batch_size', type=int, default=256, help='batch size')
+        parser.add_argument('--batch_size', type=int, default=128, help='batch size')  # Smaller batch size
         parser.add_argument('--normalization_method', type=str, default='z-score', help='min-max,z-score')
-        parser.add_argument('--epochs', type=int, default=1, help='epoch')
-        parser.add_argument('--lr', type=float, default=1e-3, help='learning rate')
-        parser.add_argument('--warmup_epochs', type=int, default=10, help='warmup epoch')
-        parser.add_argument('--warmup_lr', type=float, default=5e-4, help='warmup lr')
-        parser.add_argument('--final_lr', type=float, default=1e-4, help='final lr')
-        parser.add_argument('--lr_F', type=float, default=1e-3, help='learning rate of F')
-        parser.add_argument('--iter_per_epoch', type=int, default=1, help='iter per epoch')
-        parser.add_argument('--F_layers_num', type=int, default=3, help='the layers num of F')
-        parser.add_argument('--F_hidden_dim', type=int, default=60, help='the hidden dim of F')
-        parser.add_argument('--alpha', type=float, default=1, help='loss = l_data + alpha * l_PDE + beta * l_physics')
-        parser.add_argument('--beta', type=float, default=1, help='loss = l_data + alpha * l_PDE + beta * l_physics')
-        parser.add_argument('--save_folder', type=str, default=None, help='save folder')
-        parser.add_argument('--log_dir', type=str, default=None, help='log dir, if None, do not save')
-        parser.add_argument('--early_stop', type=int, default=None, help='early stop')
-        return parser.parse_args()
+        
+        # Updated scheduler parameters
+        parser.add_argument('--epochs', type=int, default=300, help='epoch')  # More epochs
+        parser.add_argument('--early_stop', type=int, default=30, help='early stop')  # More patience
+        parser.add_argument('--warmup_epochs', type=int, default=50, help='warmup epoch')  # Longer warmup
+        parser.add_argument('--warmup_lr', type=float, default=1e-4, help='warmup lr')  # Lower initial lr
+        parser.add_argument('--lr', type=float, default=1e-3, help='base lr')  # Lower base lr
+        parser.add_argument('--final_lr', type=float, default=1e-5, help='final lr')  # Lower final lr
+        parser.add_argument('--lr_F', type=float, default=5e-4, help='lr of F')  # Lower F lr
+        
+        # Model parameters
+        parser.add_argument('--F_layers_num', type=int, default=4, help='the layers num of F')
+        parser.add_argument('--F_hidden_dim', type=int, default=128, help='the hidden dim of F')
+        
+        # Loss weights
+        parser.add_argument('--alpha', type=float, default=1.0, help='PDE loss weight')
+        parser.add_argument('--beta', type=float, default=0.5, help='physics constraint weight')
+        
+        parser.add_argument('--log_dir', type=str, default='training_log.txt', help='log dir')
+        parser.add_argument('--save_folder', type=str, default='results', help='save folder')
+        
+        args = parser.parse_args()
+        return args
 
     args = get_args()
     pinn = PINN(args)

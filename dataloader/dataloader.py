@@ -30,14 +30,22 @@ class SimpleLoader:
 
     def read_csv(self):
         df = pd.read_csv(self.csv_path)
-        #df.insert(df.shape[1]-1, 'cycle index', np.arange(df.shape[0]))
+        # Remove 3-sigma outliers
         df = self.delete_3_sigma(df)
+        # Sanity check: print info about time column before normalization
+        print("Before normalization, time min:", df.iloc[:, -2].min(), "max:", df.iloc[:, -2].max(), "unique:", df.iloc[:, -2].unique()[:5])
+        # Normalize features except SoH (last column)
         f_df = df.iloc[:, :-1]
         if self.normalization_method == 'min-max':
             f_df = 2 * (f_df - f_df.min()) / (f_df.max() - f_df.min()) - 1
         elif self.normalization_method == 'z-score':
             f_df = (f_df - f_df.mean()) / f_df.std()
         df.iloc[:, :-1] = f_df
+        # After normalization, check that time feature is not constant
+        print("After normalization, time min:", df.iloc[:, -2].min(), "max:", df.iloc[:, -2].max(), "unique:", df.iloc[:, -2].unique()[:5])
+        # If time is constant, raise error!
+        if np.allclose(df.iloc[:, -2].std(), 0):
+            raise ValueError("The 'Time_norm' feature (second to last column) is constant after normalization! Check your data or normalization method.")
         return df
 
     def load(self):
@@ -113,4 +121,7 @@ if __name__ == '__main__':
         print('y1 shape:', y1.shape)
         print('y2 shape:', y2.shape)
         print('y1 max:', y1.max())
+        # Print first 5 times for sanity check
+        print('Time_norm x1[:5]:', x1[:5, -1])
+        print('Time_norm x2[:5]:', x2[:5, -1])
         break
