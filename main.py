@@ -1,4 +1,5 @@
 from dataloader.dataloader import SimpleLoader
+#from dataloader.dataloader import SimpleLoader_Augmented
 from Model.Model import PINN
 import argparse
 import os
@@ -13,7 +14,15 @@ def load_data(args):
     )
     loaders = data.load()
     return loaders 
-
+# def load_data_augmented(args):
+#     data = SimpleLoader_Augmented(
+#         csv_path_augmented=args.csv_file,
+#         batch_size=args.batch_size,
+#         normalization=True,
+#         normalization_method=args.normalization_method
+#     )
+#    loaders_augmented = data.load()
+#    return loaders_augmented
 def main():
     args = get_args()
     if not os.path.exists(args.save_folder):
@@ -22,6 +31,7 @@ def main():
     setattr(args, "save_folder", args.save_folder)
 
     dataloader = load_data(args)
+   # dataloader_augmented = load_data_augmented(args)
     pinn = PINN(args)
 
     train_loss_list = []
