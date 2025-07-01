@@ -33,7 +33,7 @@ class SimpleLoader:
         # Remove 3-sigma outliers
         df = self.delete_3_sigma(df)
         # Sanity check: print info about time column before normalization
-        print("Before normalization, time min:", df.iloc[:, -2].min(), "max:", df.iloc[:, -2].max(), "unique:", df.iloc[:, -2].unique()[:5])
+       #  print("Before normalization, time min:", df.iloc[:, -2].min(), "max:", df.iloc[:, -2].max(), "unique:", df.iloc[:, -2].unique()[:5])
         # Normalize features except SoH (last column)
         f_df = df.iloc[:, :-1]
         if self.normalization_method == 'min-max':
@@ -42,7 +42,7 @@ class SimpleLoader:
             f_df = (f_df - f_df.mean()) / f_df.std()
         df.iloc[:, :-1] = f_df
         # After normalization, check that time feature is not constant
-        print("After normalization, time min:", df.iloc[:, -2].min(), "max:", df.iloc[:, -2].max(), "unique:", df.iloc[:, -2].unique()[:5])
+        # print("After normalization, time min:", df.iloc[:, -2].min(), "max:", df.iloc[:, -2].max(), "unique:", df.iloc[:, -2].unique()[:5])
         # If time is constant, raise error!
         if np.allclose(df.iloc[:, -2].std(), 0):
             raise ValueError("The 'Time_norm' feature (second to last column) is constant after normalization! Check your data or normalization method.")
