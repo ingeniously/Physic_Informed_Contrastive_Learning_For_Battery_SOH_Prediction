@@ -2,7 +2,7 @@ from dataloader.dataloader import SimpleLoader
 from Model.Model import PINN
 import argparse
 import os
-
+import matplotlib.pyplot as plt
 
 def load_data(args):
     data = SimpleLoader(
@@ -16,20 +16,55 @@ def load_data(args):
 
 def main():
     args = get_args()
-    # Create output directory if needed
     if not os.path.exists(args.save_folder):
         os.makedirs(args.save_folder)
     setattr(args, "log_dir", args.log_dir)
     setattr(args, "save_folder", args.save_folder)
 
     dataloader = load_data(args)
-    
     pinn = PINN(args)
-    pinn.Train(
-        trainloader=dataloader['train'],
-        validloader=dataloader['valid'],
-        testloader=dataloader['test']
-    )
+
+    train_loss_list = []
+    val_loss_list = []
+
+    for epoch in range(args.epochs):
+        loss1, loss2, loss3 = pinn.train_one_epoch(epoch + 1, dataloader['train'])
+        train_loss = loss1 + pinn.alpha * loss2 + pinn.beta * loss3
+        train_loss_list.append(train_loss)
+
+        if dataloader.get('valid') is not None:
+            val_loss = pinn.Valid(dataloader['valid'])
+            val_loss_list.append(val_loss)
+        else:
+            val_loss_list.append(None)
+
+        print(f"[Epoch {epoch+1}] Train loss: {train_loss:.4f} | Val loss: {val_loss_list[-1]:.4f}")
+
+        pinn.scheduler.step()
+
+    # Plot after training
+    plt.figure(figsize=(10,7))
+    plt.plot(train_loss_list, label="Train Loss")
+    if any(v is not None for v in val_loss_list):
+        plt.plot(val_loss_list, label="Validation Loss")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("Training and Validation Loss")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(os.path.join(args.save_folder, "loss_curve.png"))
+    plt.show()
+    true_label, pred_label = pinn.Test(dataloader['test'])
+    plt.figure(figsize=(8,8))
+    plt.scatter(true_label, pred_label, s=2, alpha=0.5)
+    plt.xlabel("True SoH")
+    plt.ylabel("Predicted SoH")
+    plt.title("Test Set: True vs. Predicted SoH")
+    plt.plot([min(true_label), max(true_label)], [min(true_label), max(true_label)], 'k--', lw=1)
+    plt.tight_layout()
+    plt.savefig(os.path.join(args.save_folder, "test_scatter.png"))
+    plt.show()
 
 def get_args():
     parser = argparse.ArgumentParser('Hyper Parameters')

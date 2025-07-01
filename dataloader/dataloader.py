@@ -30,7 +30,7 @@ class SimpleLoader:
 
     def read_csv(self):
         df = pd.read_csv(self.csv_path)
-        df.insert(df.shape[1]-1, 'cycle index', np.arange(df.shape[0]))
+        #df.insert(df.shape[1]-1, 'cycle index', np.arange(df.shape[0]))
         df = self.delete_3_sigma(df)
         f_df = df.iloc[:, :-1]
         if self.normalization_method == 'min-max':
@@ -90,7 +90,7 @@ if __name__ == '__main__':
         parser = argparse.ArgumentParser()
         parser.add_argument('--csv_file', type=str, required=True, help='Path to CSV file')
         parser.add_argument('--batch_size', type=int, default=256, help='Batch size')
-        parser.add_argument('--normalization_method', type=str, default='z-score', help='min-max,z-score')
+        parser.add_argument('--normalization_method', type=str, default='min-max', help='min-max,z-score')
         return parser.parse_args()
 
     args = get_args()
