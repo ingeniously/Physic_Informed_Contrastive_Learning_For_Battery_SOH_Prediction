@@ -106,7 +106,7 @@ class Solution_u(nn.Module):
         )
         self._init_()
 
-    def forward(self, x,time=None):
+    def forward(self, x, time=None):
         if time is None:
           time = x[:, -1].unsqueeze(-1)
         # Make sure time is the *same tensor* as used for grad
@@ -115,10 +115,9 @@ class Solution_u(nn.Module):
         
         # Pass through predictor
         out = self.predictor(encoded)
-        out = out + 0.1 * torch.sin(time)  # Ensure direct dependency!
-       # Add explicit time dependence
-        #print("time sample:", time[:5], "requires_grad:", time.requires_grad)
-        # print("out sample:", out[:5], "requires_grad:", out.requires_grad)
+        
+        # Add explicit time dependence with stronger correlation
+        out = out + 0.2 * torch.sin(time * np.pi) + 0.1 * torch.cos(time * 2 * np.pi)
         return out
 
     def _init_(self):
@@ -126,6 +125,7 @@ class Solution_u(nn.Module):
             if isinstance(layer, nn.Linear):
                 nn.init.xavier_normal_(layer.weight)
                 nn.init.constant_(layer.bias, 0)
+
 def count_parameters(model):
     count = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('The model has {} trainable parameters'.format(count))
@@ -157,6 +157,45 @@ class LR_Scheduler(object):
 
     def get_lr(self):
         return self.current_lr
+
+class BatteryPDE:
+    """
+    Battery physics differential equations.
+    """
+    @staticmethod
+    def sei_growth_rate(soh, time):
+        """SEI growth rate equation"""
+        # SEI growth follows sqrt(t) law
+        # d(SoH)/dt = -k/2/sqrt(t)
+        k = 0.01  # SEI growth constant
+        t_small = time + 1e-6  # Prevent div by zero
+        return -k / (2 * torch.sqrt(t_small))
+    
+    @staticmethod
+    def calendar_aging_rate(soh, time, temp):
+        """Calendar aging rate equation"""
+        # Calendar aging with Arrhenius temperature dependence
+        # d(SoH)/dt = -A * exp(-Ea/RT) * sqrt(t)
+        A = 0.005  # Pre-exponential factor
+        Ea = 0.2   # Activation energy (normalized)
+        # Assume reference temperature = 0 for normalized temp
+        return -A * torch.exp(Ea * temp) / torch.sqrt(time + 1e-6)
+    
+    @staticmethod
+    def cycling_degradation_rate(soh, soc, current):
+        """Cycling degradation rate equation"""
+        # Higher degradation at extreme SoC and higher currents
+        # d(SoH)/dt = -B * f(SoC) * |I|
+        B = 0.01  # Cycling factor
+        
+        # SoC stress function - U-shaped (higher at extremes)
+        soc_norm = soc / 100.0  # Convert to [0,1]
+        soc_stress = 4 * (soc_norm - 0.5)**2 + 0.2
+        
+        # Current impact (absolute value)
+        current_impact = torch.abs(current)
+        
+        return -B * soc_stress * current_impact
 
 class PINN(nn.Module):
     def __init__(self, args):
@@ -195,6 +234,12 @@ class PINN(nn.Module):
         # Stronger physics-informed loss weight
         self.alpha = max(10, self.args.alpha)  # Strongly enforce PDE loss
         self.beta = self.args.beta
+        
+        # Physical constraints weights
+        self.gamma = 5.0  # Weight for physical boundary constraints
+        
+        # Battery PDE models
+        self.battery_pde = BatteryPDE()
 
     def _save_args(self):
         if self.args.log_dir is not None:
@@ -215,7 +260,7 @@ class PINN(nn.Module):
 
     def predict(self, xt):
         t = xt[:, -1].reshape(-1, 1)
-        return self.solution_u(xt,t)
+        return self.solution_u(xt, t)
 
     def Test(self, testloader):
         self.eval()
@@ -245,6 +290,41 @@ class PINN(nn.Module):
         true_label = np.concatenate(true_label, axis=0)
         mse = self.loss_func(torch.tensor(pred_label), torch.tensor(true_label))
         return mse.item()
+    
+    def physical_boundary_loss(self, u, xt):
+        """
+        Enforces battery physics boundary conditions:
+        1. SoH must be between 0 and 100%
+        2. SoH should be monotonically decreasing over time
+        3. SoH degradation rate should follow physical models
+        """
+        # 1. SoH range constraint: 0 <= SoH <= 100
+        range_loss = torch.mean(self.relu(-u) + self.relu(u - 100))
+        
+        # 2. Monotonicity constraint
+        t = xt[:, -1].reshape(-1, 1)
+        u_t = grad(u.sum(), t, create_graph=True)[0]
+        monotonicity_loss = torch.mean(self.relu(u_t))  # SoH should decrease over time (negative derivative)
+        
+        # 3. Physics-based degradation models
+        # Extract necessary features
+        temperature = xt[:, 2].reshape(-1, 1)  # Temperature
+        current = xt[:, 1].reshape(-1, 1)      # Current
+        soc = xt[:, 5].reshape(-1, 1)          # SoC
+        
+        # Combined degradation rate from multiple mechanisms
+        sei_rate = self.battery_pde.sei_growth_rate(u, t)
+        calendar_rate = self.battery_pde.calendar_aging_rate(u, t, temperature)
+        cycling_rate = self.battery_pde.cycling_degradation_rate(u, soc, current)
+        
+        # Total physics-based degradation rate
+        physics_rate = sei_rate + calendar_rate + cycling_rate
+        
+        # Loss between predicted degradation rate and physics-based rate
+        physics_rate_loss = torch.mean((u_t - physics_rate)**2)
+        
+        # Combined physical boundary loss
+        return range_loss + monotonicity_loss + physics_rate_loss
 
     def forward(self, xt):
         """
@@ -257,7 +337,7 @@ class PINN(nn.Module):
         t = xt[:, -1].reshape(-1, 1)
         
         # Get prediction
-        u = self.solution_u(xt,t)
+        u = self.solution_u(xt, t)
         
         # Now time gradients should exist due to explicit time dependence
         u_t = grad(u.sum(), t, create_graph=True)[0]
@@ -285,6 +365,7 @@ class PINN(nn.Module):
         loss1_meter = AverageMeter()
         loss2_meter = AverageMeter()
         loss3_meter = AverageMeter()
+        loss4_meter = AverageMeter()
         
         for iter, (x1, x2, y1, y2) in enumerate(dataloader):
             x1 = x1.to(device)
@@ -299,15 +380,23 @@ class PINN(nn.Module):
             # Data loss
             loss1 = 0.5 * self.loss_func(u1, y1) + 0.5 * self.loss_func(u2, y2)
             
-            # PDE loss
+            # PDE loss - strengthened with custom scaling based on epoch
             f_target = torch.zeros_like(f1).to(device)
             loss2 = 0.5 * self.loss_func(f1, f_target) + 0.5 * self.loss_func(f2, f_target)
             
             # Physics constraint
             loss3 = self.relu(torch.mul(u2 - u1, y1 - y2)).mean()
             
-            # Total loss
-            loss = loss1 + self.alpha * loss2 + self.beta * loss3
+            # Physical boundary loss
+            loss4 = 0.5 * self.physical_boundary_loss(u1, x1) + 0.5 * self.physical_boundary_loss(u2, x2)
+            
+            # Total loss - with epoch-dependent scaling of physics terms
+            # Gradually increase importance of physics terms
+            epoch_factor = min(1.0, epoch / 50.0)  # Ramp up over 50 epochs
+            loss = loss1 + \
+                   self.alpha * loss2 * (1.0 + epoch_factor) + \
+                   self.beta * loss3 * (1.0 + epoch_factor) + \
+                   self.gamma * loss4 * epoch_factor
             
             # Optimization step
             self.optimizer1.zero_grad()
@@ -324,12 +413,14 @@ class PINN(nn.Module):
             loss1_meter.update(loss1.item())
             loss2_meter.update(loss2.item())
             loss3_meter.update(loss3.item())
+            loss4_meter.update(loss4.item())
             
             if (iter+1) % 50 == 0:
                 print(f"[epoch:{epoch} iter:{iter+1}] "
-                    f"data loss:{loss1:.6f}, PDE loss:{loss2:.6f}, physics loss:{loss3:.6f}")
+                    f"data loss:{loss1:.6f}, PDE loss:{loss2:.6f}, "
+                    f"physics loss:{loss3:.6f}, boundary loss:{loss4:.6f}")
         
-        return loss1_meter.avg, loss2_meter.avg, loss3_meter.avg
+        return loss1_meter.avg, loss2_meter.avg, loss3_meter.avg, loss4_meter.avg
 
     def Train(self, trainloader, testloader=None, validloader=None):
         min_valid_mse = float('inf')
@@ -337,9 +428,10 @@ class PINN(nn.Module):
         early_stop = 0
         for e in range(1, self.args.epochs+1):
             early_stop += 1
-            loss1, loss2, loss3 = self.train_one_epoch(e, trainloader)
+            loss1, loss2, loss3, loss4 = self.train_one_epoch(e, trainloader)
             current_lr = self.scheduler.step()
-            info = f'[Train] epoch:{e}, lr:{current_lr:.6f}, total loss:{loss1+self.alpha*loss2+self.beta*loss3:.6f}'
+            info = f'[Train] epoch:{e}, lr:{current_lr:.6f}, total loss:{loss1+self.alpha*loss2+self.beta*loss3+self.gamma*loss4:.6f}'
+            info += f' data:{loss1:.6f}, PDE:{loss2:.6f}, physics:{loss3:.6f}, boundary:{loss4:.6f}'
             self.logger.info(info)
             if e % 1 == 0 and validloader is not None:
                 valid_mse = self.Valid(validloader)
