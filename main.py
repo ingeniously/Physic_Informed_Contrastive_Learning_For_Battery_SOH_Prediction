@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from torch.optim.lr_scheduler import CosineAnnealingLR
+from sklearn.metrics import r2_score
 
 def load_data(args):
     data = SimpleLoader(
@@ -32,10 +33,10 @@ def load_augmented_data(args):
 def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    # Use a more effective optimizer setup
+    # Use a more effective optimizer setup with lower learning rate
     optimizer = torch.optim.AdamW(
         wrapper.parameters(), 
-        lr=args.lr,
+        lr=args.lr * 0.5,  # Lower learning rate for more stable training
         weight_decay=1e-4,
         betas=(0.9, 0.999)
     )
@@ -56,8 +57,9 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
     with open(log_file, 'w') as f:
         f.write("Epoch\tTotal Loss\tPINN Loss\tContrastive Loss\tPDE Loss\tPhysics Loss\n")
     
-    # Adaptive contrastive weight
-    contrastive_weight = args.contrastive_weight
+    # Adaptive contrastive weight - start lower
+    contrastive_weight = args.contrastive_weight * 0.5
+    wrapper.contrastive_weight = contrastive_weight
     
     # Best validation metrics tracking
     best_val_loss = float('inf')
@@ -68,31 +70,37 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
         total_loss_epoch, pinn_loss_epoch, contrastive_loss_epoch = [], [], []
         pde_loss_epoch, physics_loss_epoch = [], []
         
-        # Dynamically balance contrastive and PINN weights
-        if epoch > args.epochs // 2:
-            # Gradually reduce contrastive weight and increase PINN weight
-            contrastive_weight = max(0.2, args.contrastive_weight * (1.0 - epoch / args.epochs))
+        # Gradually decrease contrastive weight over time
+        if epoch > args.epochs // 3:
+            # Gradually reduce contrastive weight to focus more on PINN losses
+            contrastive_weight = max(0.05, args.contrastive_weight * 0.5 * (1.0 - epoch / args.epochs))
             wrapper.contrastive_weight = contrastive_weight
+            print(f"Contrastive weight adjusted to {contrastive_weight:.4f}")
         
         # Reset iterators for each epoch
         orig_iter = iter(orig_loader['train'])
         aug_iter = iter(aug_loader['train'])
         
-        # Determine the minimum number of batches
-        n_batches = min(len(orig_loader['train']), len(aug_loader['train']))
+        # Determine the minimum number of batches and use all original data
+        n_batches = len(orig_loader['train'])
         
-        for step in range(n_batches):  # FIXED: Use n_batches directly, not len(n_batches)
+        for step in range(n_batches):
             # Dynamic learning rate during warmup
             if step + epoch * n_batches < warmup_steps:
                 lr_scale = min(1., float(step + epoch * n_batches) / float(warmup_steps))
                 for param_group in optimizer.param_groups:
-                    param_group['lr'] = lr_scale * args.lr
+                    param_group['lr'] = lr_scale * args.lr * 0.5  # Lower base lr
             
+            # Get original data
+            x1, _, y1, _ = next(orig_iter)
+            
+            # Handle the case where we've gone through all augmented data
             try:
-                x1, _, y1, _ = next(orig_iter)
                 x2, _, y2, _ = next(aug_iter)
             except StopIteration:
-                break
+                # Reset augmented data iterator if we run out
+                aug_iter = iter(aug_loader['train'])
+                x2, _, y2, _ = next(aug_iter)
                 
             x1, x2 = x1.to(device), x2.to(device)
             y1, y2 = y1.to(device), y2.to(device)
@@ -100,12 +108,9 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
             optimizer.zero_grad()
             total_loss, pinn_loss, contrastive_loss, pde_loss, physics_loss = wrapper(x1, x2, y1, y2)
             
-            # Use gradient accumulation for larger effective batch size
+            # Gradient clipping for stability
             total_loss.backward()
-            
-            # Gradient clipping to prevent instability
             torch.nn.utils.clip_grad_norm_(wrapper.parameters(), max_norm=1.0)
-            
             optimizer.step()
             
             # Log losses
@@ -115,15 +120,14 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
             pde_loss_epoch.append(pde_loss.item())
             physics_loss_epoch.append(physics_loss.item())
             
-            # Print progress for every 1000 steps
-            if (step + 1) % 1000 == 0:
+            # Print progress more frequently
+            if (step + 1) % 1887 == 0:
                 print(f"[Epoch {epoch+1}/{args.epochs}][Step {step+1}/{n_batches}] "
                       f"Loss: {total_loss.item():.4f} | PINN: {pinn_loss.item():.4f} | "
                       f"Contrastive: {contrastive_loss.item():.4f} | PDE: {pde_loss.item():.4f}")
         
         # Step the scheduler at the end of each epoch
         scheduler.step()
-        
         
         # Compute average losses for the epoch
         avg_total = sum(total_loss_epoch) / len(total_loss_epoch)
@@ -146,8 +150,8 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
         print(f"[Epoch {epoch+1}] Total loss: {avg_total:.4f} | PINN loss: {avg_pinn:.4f} | "
               f"Contrastive loss: {avg_contrastive:.4f} | PDE loss: {avg_pde:.4f} | Physics loss: {avg_phys:.4f}")
         
-        # Evaluate on validation set every 10 epochs
-        if (epoch + 1) % 10 == 0:
+        # Evaluate on validation set every 5 epochs
+        if (epoch + 1) % 5 == 0 or epoch == 0 or epoch == args.epochs - 1:
             wrapper.pinn.eval()
             with torch.no_grad():
                 val_loss = wrapper.pinn.Valid(orig_loader['valid'])
@@ -174,11 +178,15 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
                 true_label, pred_label = wrapper.pinn.Test(orig_loader['test'])
                 from utils.util import eval_metrix
                 [MAE, MAPE, MSE, RMSE] = eval_metrix(pred_label, true_label)
-                print(f"[Test] MSE: {MSE:.8f}, MAE: {MAE:.6f}, MAPE: {MAPE:.6f}, RMSE: {RMSE:.6f}")
+                r2 = r2_score(true_label, pred_label)
+                print(f"[Test] MSE: {MSE:.8f}, MAE: {MAE:.6f}, MAPE: {MAPE:.6f}, RMSE: {RMSE:.6f}, R²: {r2:.4f}")
                 
                 # Save predictions for analysis
                 np.save(os.path.join(args.save_folder, 'true_label.npy'), true_label)
                 np.save(os.path.join(args.save_folder, 'pred_label.npy'), pred_label)
+                
+                # Generate scatter plot
+                create_prediction_scatter(true_label, pred_label, os.path.join(args.save_folder, f'prediction_scatter_epoch_{epoch+1}.png'))
     
     # Save the final model
     torch.save({
@@ -191,8 +199,52 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
     plot_learning_curves(train_loss_list, pinn_loss_list, contrastive_loss_list, 
                          pde_loss_list, physics_loss_list, args.save_folder)
     
+    # Load best model and generate final visualization
+    try:
+        checkpoint = torch.load(os.path.join(args.save_folder, 'best_model.pth'))
+        wrapper.pinn.load_state_dict(checkpoint['pinn_state_dict'])
+        wrapper.pinn.eval()
+        true_label, pred_label = wrapper.pinn.Test(orig_loader['test'])
+        create_prediction_scatter(true_label, pred_label, os.path.join(args.save_folder, 'final_prediction_scatter.png'))
+    except:
+        print("Could not load best model for final visualization")
+    
     print(f"Training completed. Best model at epoch {best_epoch} with validation MSE: {best_val_loss:.6f}")
     return best_val_loss
+
+def create_prediction_scatter(true_label, pred_label, save_path):
+    """
+    Create scatter plot of true vs predicted values with additional metrics.
+    """
+    plt.figure(figsize=(10, 8))
+    
+    # Calculate metrics for annotation
+    mse = np.mean((true_label - pred_label) ** 2)
+    rmse = np.sqrt(mse)
+    mae = np.mean(np.abs(true_label - pred_label))
+    r2 = r2_score(true_label, pred_label)
+    
+    # Create scatter plot
+    plt.scatter(true_label, pred_label, alpha=0.5)
+    
+    # Add perfect prediction line
+    min_val = min(true_label.min(), pred_label.min())
+    max_val = max(true_label.max(), pred_label.max())
+    plt.plot([min_val, max_val], [min_val, max_val], 'r--')
+    
+    # Add metrics text
+    plt.annotate(f'MSE = {mse:.4f}\nRMSE = {rmse:.4f}\nMAE = {mae:.4f}\nR² = {r2:.4f}',
+                xy=(0.05, 0.95), xycoords='axes fraction',
+                bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.8))
+    
+    plt.xlabel('True SoH')
+    plt.ylabel('Predicted SoH')
+    plt.title('Battery SoH: True vs Predicted Values')
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close()
+    print(f"Prediction scatter plot saved to {save_path}")
 
 def plot_learning_curves(train_loss, pinn_loss, contrastive_loss, pde_loss, physics_loss, save_folder):
     """
@@ -325,7 +377,7 @@ def main():
     wrapper = ContrastivePINNWrapper(
         pinn,
         temperature=args.temperature,
-        contrastive_weight=args.contrastive_weight,
+        contrastive_weight=args.contrastive_weight * 0.5,  # Start with lower contrastive weight
         pinn_weight=args.pinn_weight,
         projection_dim=args.projection_dim,
         momentum=args.momentum,

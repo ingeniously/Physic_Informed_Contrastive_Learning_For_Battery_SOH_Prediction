@@ -2,7 +2,7 @@ csv_file: /home/choi/PICL/data_processed/preprocessed_battery_health_dataset_all
 csv_file_augmented: /home/choi/PICL/data_augmentation/battery_phys_augmented.csv
 batch_size: 128
 normalization_method: z-score
-epochs: 30
+epochs: 50
 early_stop: 30
 lr: 0.001
 lr_F: 0.0005

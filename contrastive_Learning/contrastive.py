@@ -33,7 +33,6 @@ class MomentumEncoder(nn.Module):
         self.momentum = momentum
         
         # Create momentum encoder and projector by deep copying the original networks
-        # This avoids issues with __dict__ containing training flags
         self.momentum_encoder = deepcopy(encoder)
         self.momentum_projection = deepcopy(projection_head)
         
@@ -66,7 +65,7 @@ class ContrastivePINNWrapper(nn.Module):
     Wrapper for multi-task learning with PINN and contrastive loss.
     It expects the PINN to have an encoder (e.g., solution_u.encoder).
     """
-    def __init__(self, pinn, temperature=0.07, contrastive_weight=1.0, pinn_weight=1.0,
+    def __init__(self, pinn, temperature=0.07, contrastive_weight=0.5, pinn_weight=1.0,
                  projection_dim=128, momentum=0.999, queue_size=4096):
         super().__init__()
         self.pinn = pinn
@@ -88,13 +87,9 @@ class ContrastivePINNWrapper(nn.Module):
         self.queue_size = queue_size
         
         self.temperature = temperature
-        self.contrastive_weight = contrastive_weight
+        self.contrastive_weight = contrastive_weight  # Reduced from 1.0 to 0.5
         self.pinn_weight = pinn_weight
         self.loss_func = nn.MSELoss()
-        
-        # Hard negative mining parameters
-        self.hard_negative_weight = 2.0  # Weight for hard negatives
-        self.hard_threshold = 0.75  # Cosine similarity threshold for hard negatives
         
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys):
@@ -115,105 +110,39 @@ class ContrastivePINNWrapper(nn.Module):
         ptr = (ptr + batch_size) % self.queue_size
         self.queue_ptr[0] = ptr
 
-    def info_nce_loss(self, query, key, negatives):
+    def simclr_loss(self, z_i, z_j):
         """
-        InfoNCE loss with hard negative mining and temperature scaling.
+        Simple SimCLR-style contrastive loss.
         
         Args:
-            query: Query embeddings (output from online encoder)
-            key: Positive key embeddings (output from momentum encoder)
-            negatives: Negative samples (from queue)
-        Returns:
-            Loss value
-        """
-        # Positive similarity
-        pos = torch.einsum('nc,nc->n', [query, key]).unsqueeze(-1)
-        
-        # Negative similarity
-        neg = torch.einsum('nc,kc->nk', [query, negatives])
-        
-        # Identify hard negatives (high similarity negatives)
-        with torch.no_grad():
-            hard_mask = (neg > self.hard_threshold).float()
-            # Ensure we have at least some hard negatives
-            if hard_mask.sum() == 0:
-                topk_values, _ = torch.topk(neg, k=max(1, int(0.1 * neg.shape[1])), dim=1)
-                min_topk = topk_values[:, -1].unsqueeze(-1)
-                hard_mask = (neg >= min_topk).float()
-                
-        # Apply hard negative mining by increasing weight of hard negatives
-        neg = neg * (1 + (self.hard_negative_weight - 1) * hard_mask)
-            
-        # All logits (positive and negatives)
-        logits = torch.cat([pos, neg], dim=1) / self.temperature
-        
-        # Labels: positives are at index 0
-        labels = torch.zeros(logits.shape[0], dtype=torch.long, device=logits.device)
-        
-        # Calculate cross-entropy loss
-        return F.cross_entropy(logits, labels)
-
-    def nt_xent_loss(self, z_i, z_j, z_neg=None):
-        """
-        NT-Xent (SimCLR-style) contrastive loss with hard negative mining.
-        
-        Args:
-            z_i, z_j: Positive pair embeddings
-            z_neg: Optional additional negative samples
+            z_i, z_j: Normalized embeddings from the two augmented views
         Returns:
             Loss value
         """
         batch_size = z_i.size(0)
         
-        # Original positive pairs (i,j) and (j,i)
-        z = torch.cat([z_i, z_j], dim=0)  # [2N, D]
-        z = F.normalize(z, dim=1)
+        # Concatenate representations
+        representations = torch.cat([z_i, z_j], dim=0)
         
         # Compute similarity matrix
-        similarity = torch.matmul(z, z.T) / self.temperature  # [2N, 2N]
+        similarity_matrix = F.cosine_similarity(representations.unsqueeze(1), 
+                                               representations.unsqueeze(0), 
+                                               dim=2) / self.temperature
         
-        # Mask self-comparisons
-        mask = torch.eye(2 * batch_size, dtype=torch.bool, device=z.device)
-        similarity = similarity.masked_fill(mask, float('-inf'))
+        # Mask out self-similarity
+        mask = torch.eye(2 * batch_size, dtype=torch.bool, device=z_i.device)
+        similarity_matrix = similarity_matrix.masked_fill(mask, -float('inf'))
         
-        # Identify positive pairs: (i,j) and (j,i)
+        # Define positive pairs: (2i,2i+1) and (2i+1,2i)
         positives = torch.cat([
             torch.arange(batch_size, 2*batch_size),
             torch.arange(0, batch_size)
-        ]).to(z.device)
+        ]).to(z_i.device)
         
-        # Get negatives - all except positives and self
-        batch_indices = torch.arange(2*batch_size).to(z.device)
-        expanded_positives = positives.unsqueeze(1).expand(-1, 2*batch_size)
-        expanded_indices = batch_indices.unsqueeze(0).expand(2*batch_size, -1)
-        negative_mask = ~((expanded_indices == expanded_positives) | mask)
+        # Cross entropy loss (NLL applied to softmax of similarities)
+        loss = F.cross_entropy(similarity_matrix, positives)
         
-        # Hard negative mining
-        with torch.no_grad():
-            # Find most similar negatives
-            neg_similarities = similarity.clone()
-            neg_similarities.masked_fill_(~negative_mask, float('-inf'))
-            hard_negatives = (neg_similarities > self.hard_threshold)
-            
-            # Ensure we have some hard negatives
-            if not hard_negatives.any():
-                # If no negatives above threshold, take top 10% as hard
-                neg_similarities_flat = neg_similarities.reshape(2*batch_size, -1)
-                k = max(1, int(0.1 * neg_similarities_flat.shape[1]))
-                topk_vals, _ = torch.topk(neg_similarities_flat, k=k, dim=1)
-                min_topk = topk_vals[:, -1].unsqueeze(-1)
-                hard_negatives = (neg_similarities_flat >= min_topk).view_as(neg_similarities)
-                hard_negatives = hard_negatives & negative_mask
-            
-        # Apply stronger weighting to hard negatives
-        similarity = similarity.masked_fill(hard_negatives, similarity * self.hard_negative_weight)
-        
-        # Compute logits and labels for contrastive loss
-        logits = similarity
-        labels = positives
-        
-        # Cross entropy loss
-        return F.cross_entropy(logits, labels)
+        return loss
 
     def forward(self, x1, x2, y1, y2):
         """
@@ -240,28 +169,27 @@ class ContrastivePINNWrapper(nn.Module):
         physics_loss = self.pinn.relu(torch.mul(u2 - u1, y1 - y2)).mean()
         pinn_loss = data_loss + self.pinn.alpha * pde_loss + self.pinn.beta * physics_loss
         
-        # -- Contrastive representations with momentum encoder --
-        # Get online encoder representations
+        # -- Contrastive representations with simpler SimCLR approach --
+        # Get encoder representations
         z1 = self.encoder(x1)
         z2 = self.encoder(x2)
         
         # Project to contrastive space
-        q1 = self.projection_head(z1)  # queries from online encoder
+        q1 = self.projection_head(z1)
         q2 = self.projection_head(z2)
         
-        # Get momentum encoder representations (no gradient)
-        with torch.no_grad():
-            k1 = self.momentum_encoder.momentum_forward(x1)  # keys from momentum encoder
-            k2 = self.momentum_encoder.momentum_forward(x2)
+        # Normalize projections
+        q1 = F.normalize(q1, dim=1)
+        q2 = F.normalize(q2, dim=1)
         
-        # MoCo contrastive loss
-        queue = self.queue.clone().detach()
-        contrastive_loss = 0.5 * self.info_nce_loss(q1, k2, queue) + 0.5 * self.info_nce_loss(q2, k1, queue)
+        # Simple SimCLR contrastive loss
+        contrastive_loss = self.simclr_loss(q1, q2)
         
-        # Update queue and momentum encoder
-        self._dequeue_and_enqueue(torch.cat([k1, k2], dim=0))
+        # Update momentum encoder (keep this for consistency even though we're using SimCLR)
         self.momentum_encoder.update_momentum_encoder()
         
         # -- Total loss --
+        # Scale contrastive loss to be smaller relative to PINN loss
         total_loss = self.contrastive_weight * contrastive_loss + self.pinn_weight * pinn_loss
+        
         return total_loss, pinn_loss, contrastive_loss, pde_loss, physics_loss
