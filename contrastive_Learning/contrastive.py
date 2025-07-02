@@ -15,6 +15,9 @@ class ProjectionHead(nn.Module):
             nn.Linear(input_dim, hidden_dim),
             nn.BatchNorm1d(hidden_dim),
             nn.ReLU(inplace=True),
+            nn.Linear(hidden_dim, hidden_dim),  # Added extra layer for better representation
+            nn.BatchNorm1d(hidden_dim),
+            nn.ReLU(inplace=True),
             nn.Linear(hidden_dim, output_dim),
             nn.BatchNorm1d(output_dim)
         )
@@ -91,6 +94,10 @@ class ContrastivePINNWrapper(nn.Module):
         self.pinn_weight = pinn_weight
         self.loss_func = nn.MSELoss()
         
+        # Add alignment and uniformity weights
+        self.alignment_weight = 0.5
+        self.uniformity_weight = 0.5
+        
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys):
         """Update queue with current batch"""
@@ -110,9 +117,31 @@ class ContrastivePINNWrapper(nn.Module):
         ptr = (ptr + batch_size) % self.queue_size
         self.queue_ptr[0] = ptr
 
+    def alignment_and_uniformity(self, z_i, z_j):
+        """
+        Compute alignment and uniformity losses as in Wang & Isola (2020)
+        
+        Args:
+            z_i, z_j: Normalized embeddings
+        Returns:
+            alignment, uniformity losses
+        """
+        # Alignment loss: Expected distance between positive pairs
+        # Lower is better (positive pairs should be close)
+        alignment = (z_i - z_j).norm(dim=1).pow(2).mean()
+        
+        # Uniformity loss: Measures how uniformly distributed the embeddings are
+        # Lower is better (points should be uniformly distributed)
+        t = 2  # Hyperparameter controlling the scale
+        uniformity_i = torch.pdist(z_i, p=2).pow(2).mul(-t).exp().mean().log()
+        uniformity_j = torch.pdist(z_j, p=2).pow(2).mul(-t).exp().mean().log()
+        uniformity = (uniformity_i + uniformity_j) / 2
+        
+        return alignment, uniformity
+
     def simclr_loss(self, z_i, z_j):
         """
-        Simple SimCLR-style contrastive loss.
+        Enhanced SimCLR-style contrastive loss with alignment and uniformity.
         
         Args:
             z_i, z_j: Normalized embeddings from the two augmented views
@@ -139,10 +168,16 @@ class ContrastivePINNWrapper(nn.Module):
             torch.arange(0, batch_size)
         ]).to(z_i.device)
         
-        # Cross entropy loss (NLL applied to softmax of similarities)
-        loss = F.cross_entropy(similarity_matrix, positives)
+        # Basic SimCLR loss (NLL applied to softmax of similarities)
+        nce_loss = F.cross_entropy(similarity_matrix, positives)
         
-        return loss
+        # Calculate alignment and uniformity
+        alignment, uniformity = self.alignment_and_uniformity(z_i, z_j)
+        
+        # Combined loss
+        total_loss = nce_loss + self.alignment_weight * alignment + self.uniformity_weight * uniformity
+        
+        return total_loss
 
     def forward(self, x1, x2, y1, y2):
         """
@@ -169,7 +204,7 @@ class ContrastivePINNWrapper(nn.Module):
         physics_loss = self.pinn.relu(torch.mul(u2 - u1, y1 - y2)).mean()
         pinn_loss = data_loss + self.pinn.alpha * pde_loss + self.pinn.beta * physics_loss
         
-        # -- Contrastive representations with simpler SimCLR approach --
+        # -- Contrastive representations with enhanced SimCLR approach --
         # Get encoder representations
         z1 = self.encoder(x1)
         z2 = self.encoder(x2)
@@ -178,18 +213,17 @@ class ContrastivePINNWrapper(nn.Module):
         q1 = self.projection_head(z1)
         q2 = self.projection_head(z2)
         
-        # Normalize projections
-        q1 = F.normalize(q1, dim=1)
-        q2 = F.normalize(q2, dim=1)
-        
-        # Simple SimCLR contrastive loss
+        # Enhanced SimCLR contrastive loss with alignment and uniformity
         contrastive_loss = self.simclr_loss(q1, q2)
         
-        # Update momentum encoder (keep this for consistency even though we're using SimCLR)
+        # Update momentum encoder (keep this for consistency)
         self.momentum_encoder.update_momentum_encoder()
         
-        # -- Total loss --
-        # Scale contrastive loss to be smaller relative to PINN loss
-        total_loss = self.contrastive_weight * contrastive_loss + self.pinn_weight * pinn_loss
+        # Dynamic contrastive weight based on relative loss magnitudes
+        relative_scale = min(1.0, pinn_loss.item() / (contrastive_loss.item() + 1e-6))
+        effective_weight = self.contrastive_weight * relative_scale
+        
+        # -- Total loss with adaptive weighting --
+        total_loss = effective_weight * contrastive_loss + self.pinn_weight * pinn_loss
         
         return total_loss, pinn_loss, contrastive_loss, pde_loss, physics_loss

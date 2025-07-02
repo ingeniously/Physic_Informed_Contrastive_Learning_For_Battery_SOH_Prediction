@@ -5,6 +5,10 @@ from torch.autograd import grad
 from dataloader import dataloader
 from utils.util import AverageMeter, get_logger, eval_metrix
 import os
+import wandb  # Import wandb for visualization
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -240,6 +244,29 @@ class PINN(nn.Module):
         
         # Battery PDE models
         self.battery_pde = BatteryPDE()
+        
+        # For visualization
+        self.train_history = {
+            'data_loss': [],
+            'pde_loss': [],
+            'physics_loss': [],
+            'boundary_loss': [],
+            'total_loss': [],
+            'epochs': [],
+            'lr': []
+        }
+        
+        # Create model architecture visualization for wandb
+        if hasattr(wandb, 'run') and wandb.run is not None:
+            try:
+                from torchviz import make_dot
+                x_sample = torch.randn(1, 9).to(device)
+                y_pred, f_pred = self(x_sample)
+                model_graph = make_dot(y_pred, params=dict(self.named_parameters()))
+                model_graph.render("model_architecture", format="png")
+                wandb.log({"model_architecture": wandb.Image("model_architecture.png")})
+            except:
+                print("Could not create model visualization for wandb")
 
     def _save_args(self):
         if self.args.log_dir is not None:
@@ -262,6 +289,172 @@ class PINN(nn.Module):
         t = xt[:, -1].reshape(-1, 1)
         return self.solution_u(xt, t)
 
+    def visualize_prediction_vs_true(self, true, pred, epoch, save_folder=None):
+        """
+        Create and save scatter plot of predictions vs true values
+        """
+        plt.figure(figsize=(10, 8))
+        
+        # Calculate metrics
+        mse = mean_squared_error(true, pred)
+        rmse = np.sqrt(mse)
+        mae = mean_absolute_error(true, pred)
+        r2 = r2_score(true, pred)
+        
+        # Create scatter plot with colormap indicating density
+        counts, xbins, ybins = np.histogram2d(true.flatten(), pred.flatten(), bins=50)
+        sns.scatterplot(x=true.flatten(), y=pred.flatten(), alpha=0.6)
+        
+        # Add perfect prediction line
+        min_val = min(true.min(), pred.min())
+        max_val = max(true.max(), pred.max())
+        plt.plot([min_val, max_val], [min_val, max_val], 'r--', linewidth=2)
+        
+        # Add metrics to plot
+        plt.annotate(f"MSE: {mse:.6f}\nRMSE: {rmse:.6f}\nMAE: {mae:.6f}\nR²: {r2:.6f}",
+                    xy=(0.05, 0.95), xycoords='axes fraction',
+                    bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.8),
+                    verticalalignment='top')
+        
+        plt.xlabel("True SoH")
+        plt.ylabel("Predicted SoH")
+        plt.title(f"Prediction vs Ground Truth (Epoch {epoch})")
+        plt.grid(True, linestyle='--', alpha=0.7)
+        plt.tight_layout()
+        
+        if save_folder:
+            save_path = os.path.join(save_folder, f"prediction_scatter_epoch_{epoch}.png")
+            plt.savefig(save_path, dpi=300)
+            
+            # Log to wandb if initialized
+            if hasattr(wandb, 'run') and wandb.run is not None:
+                wandb.log({f"prediction/scatter_epoch_{epoch}": wandb.Image(save_path)})
+                
+        plt.close()
+        return mse, rmse, mae, r2
+
+    def visualize_feature_importance(self, x_data, save_folder=None):
+        """
+        Visualize feature importance by perturbing inputs
+        """
+        if not save_folder:
+            return
+            
+        feature_names = ['Voltage', 'Current', 'Temperature', 'Current_load', 
+                         'Voltage_load', 'SoC', 'Resistance', 'Capacity', 'Time']
+        
+        # Original predictions
+        self.eval()
+        with torch.no_grad():
+            x_tensor = torch.tensor(x_data, dtype=torch.float32).to(device)
+            original_pred = self.predict(x_tensor).cpu().numpy()
+            
+        # Calculate importance by perturbation
+        importance = []
+        for i in range(x_data.shape[1]):
+            # Create perturbed data - increase by 10%
+            perturbed_data = x_data.copy()
+            perturbed_data[:, i] *= 1.1  # 10% increase
+            
+            # Get predictions for perturbed data
+            with torch.no_grad():
+                x_perturbed = torch.tensor(perturbed_data, dtype=torch.float32).to(device)
+                perturbed_pred = self.predict(x_perturbed).cpu().numpy()
+                
+            # Calculate change in prediction
+            diff = np.mean(np.abs(perturbed_pred - original_pred))
+            importance.append(diff)
+                
+        # Plot feature importance
+        plt.figure(figsize=(12, 6))
+        importance = np.array(importance)
+        # Normalize importance
+        importance = importance / np.sum(importance)
+        
+        bars = plt.bar(feature_names, importance, color='skyblue')
+        plt.xticks(rotation=45)
+        plt.ylabel('Normalized Importance')
+        plt.title('Feature Importance for SoH Prediction')
+        
+        # Add values on top of bars
+        for bar in bars:
+            height = bar.get_height()
+            plt.gca().text(bar.get_x() + bar.get_width()/2., height,
+                         f'{height:.3f}', ha='center', va='bottom')
+                         
+        plt.tight_layout()
+        save_path = os.path.join(save_folder, 'feature_importance.png')
+        plt.savefig(save_path, dpi=300)
+        
+        # Log to wandb if initialized
+        if hasattr(wandb, 'run') and wandb.run is not None:
+            wandb.log({"analysis/feature_importance": wandb.Image(save_path)})
+            
+        plt.close()
+
+    def visualize_training_history(self, save_folder=None):
+        """
+        Create visualization of training history
+        """
+        if not save_folder or len(self.train_history['epochs']) == 0:
+            return
+            
+        plt.figure(figsize=(12, 8))
+        
+        # Plot losses
+        plt.subplot(2, 1, 1)
+        plt.plot(self.train_history['epochs'], self.train_history['data_loss'], 'b-', label='Data Loss')
+        plt.plot(self.train_history['epochs'], self.train_history['pde_loss'], 'r-', label='PDE Loss')
+        plt.plot(self.train_history['epochs'], self.train_history['physics_loss'], 'g-', label='Physics Loss')
+        plt.plot(self.train_history['epochs'], self.train_history['boundary_loss'], 'y-', label='Boundary Loss')
+        plt.plot(self.train_history['epochs'], self.train_history['total_loss'], 'k-', label='Total Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.title('Training Loss History')
+        plt.legend()
+        plt.grid(True, linestyle='--', alpha=0.7)
+        
+        # Plot learning rate
+        plt.subplot(2, 1, 2)
+        plt.plot(self.train_history['epochs'], self.train_history['lr'], 'b-')
+        plt.xlabel('Epoch')
+        plt.ylabel('Learning Rate')
+        plt.title('Learning Rate Schedule')
+        plt.grid(True, linestyle='--', alpha=0.7)
+        
+        plt.tight_layout()
+        save_path = os.path.join(save_folder, 'training_history.png')
+        plt.savefig(save_path, dpi=300)
+        
+        # Log to wandb if initialized
+        if hasattr(wandb, 'run') and wandb.run is not None:
+            wandb.log({"training/history": wandb.Image(save_path)})
+            
+        plt.close()
+        
+        # Also create log-scale version
+        plt.figure(figsize=(12, 8))
+        plt.semilogy(self.train_history['epochs'], self.train_history['data_loss'], 'b-', label='Data Loss')
+        plt.semilogy(self.train_history['epochs'], self.train_history['pde_loss'], 'r-', label='PDE Loss')
+        plt.semilogy(self.train_history['epochs'], self.train_history['physics_loss'], 'g-', label='Physics Loss')
+        plt.semilogy(self.train_history['epochs'], self.train_history['boundary_loss'], 'y-', label='Boundary Loss')
+        plt.semilogy(self.train_history['epochs'], self.train_history['total_loss'], 'k-', label='Total Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss (log scale)')
+        plt.title('Training Loss History (Log Scale)')
+        plt.legend()
+        plt.grid(True, which='both', linestyle='--', alpha=0.7)
+        
+        plt.tight_layout()
+        log_save_path = os.path.join(save_folder, 'training_history_log.png')
+        plt.savefig(log_save_path, dpi=300)
+        
+        # Log to wandb if initialized
+        if hasattr(wandb, 'run') and wandb.run is not None:
+            wandb.log({"training/history_log": wandb.Image(log_save_path)})
+            
+        plt.close()
+
     def Test(self, testloader):
         self.eval()
         true_label = []
@@ -274,6 +467,38 @@ class PINN(nn.Module):
                 pred_label.append(u1.cpu().numpy())
         pred_label = np.concatenate(pred_label, axis=0)
         true_label = np.concatenate(true_label, axis=0)
+        
+        # Create visualization of test results
+        try:
+            if hasattr(wandb, 'run') and wandb.run is not None:
+                mse, rmse, mae, r2 = self.visualize_prediction_vs_true(
+                    true_label, pred_label, "final", 
+                    save_folder=self.args.save_folder if hasattr(self.args, "save_folder") else None
+                )
+                wandb.log({
+                    "test/mse": mse,
+                    "test/rmse": rmse,
+                    "test/mae": mae,
+                    "test/r2": r2
+                })
+                
+                # Also attempt to visualize feature importance if we have data
+                if len(true_label) > 0:
+                    x_data = []
+                    for x1, _, _, _ in testloader:
+                        x_data.append(x1.cpu().numpy())
+                    if x_data:
+                        x_data = np.concatenate(x_data, axis=0)
+                        if x_data.shape[0] > 100:  # Use a sample for efficiency
+                            indices = np.random.choice(x_data.shape[0], 100, replace=False)
+                            x_sample = x_data[indices]
+                            self.visualize_feature_importance(
+                                x_sample, 
+                                save_folder=self.args.save_folder if hasattr(self.args, "save_folder") else None
+                            )
+        except Exception as e:
+            print(f"Error creating test visualizations: {e}")
+                
         return true_label, pred_label
 
     def Valid(self, validloader):
@@ -289,6 +514,15 @@ class PINN(nn.Module):
         pred_label = np.concatenate(pred_label, axis=0)
         true_label = np.concatenate(true_label, axis=0)
         mse = self.loss_func(torch.tensor(pred_label), torch.tensor(true_label))
+        
+        # Log validation metrics to wandb
+        if hasattr(wandb, 'run') and wandb.run is not None:
+            wandb.log({
+                "validation/mse": mse.item(),
+                "validation/rmse": np.sqrt(mse.item()),
+                "validation/r2": r2_score(true_label, pred_label)
+            })
+            
         return mse.item()
     
     def physical_boundary_loss(self, u, xt):
@@ -419,6 +653,48 @@ class PINN(nn.Module):
                 print(f"[epoch:{epoch} iter:{iter+1}] "
                     f"data loss:{loss1:.6f}, PDE loss:{loss2:.6f}, "
                     f"physics loss:{loss3:.6f}, boundary loss:{loss4:.6f}")
+                
+                # Log batch-level metrics to wandb
+                if hasattr(wandb, 'run') and wandb.run is not None:
+                    wandb.log({
+                        "batch/data_loss": loss1.item(),
+                        "batch/pde_loss": loss2.item(),
+                        "batch/physics_loss": loss3.item(),
+                        "batch/boundary_loss": loss4.item(),
+                        "batch/total_loss": loss.item(),
+                        "batch": epoch * len(dataloader) + iter
+                    })
+        
+        # Save training history
+        self.train_history['data_loss'].append(loss1_meter.avg)
+        self.train_history['pde_loss'].append(loss2_meter.avg)
+        self.train_history['physics_loss'].append(loss3_meter.avg)
+        self.train_history['boundary_loss'].append(loss4_meter.avg)
+        self.train_history['total_loss'].append(loss1_meter.avg + 
+                                              self.alpha * loss2_meter.avg + 
+                                              self.beta * loss3_meter.avg + 
+                                              self.gamma * loss4_meter.avg)
+        self.train_history['epochs'].append(epoch)
+        self.train_history['lr'].append(self.scheduler.get_lr())
+        
+        # Log epoch-level metrics to wandb
+        if hasattr(wandb, 'run') and wandb.run is not None:
+            wandb.log({
+                "train/data_loss": loss1_meter.avg,
+                "train/pde_loss": loss2_meter.avg,
+                "train/physics_loss": loss3_meter.avg,
+                "train/boundary_loss": loss4_meter.avg,
+                "train/total_loss": loss1_meter.avg + self.alpha*loss2_meter.avg + 
+                                   self.beta*loss3_meter.avg + self.gamma*loss4_meter.avg,
+                "train/learning_rate": self.scheduler.get_lr(),
+                "epoch": epoch
+            })
+            
+        # Create training history visualization periodically
+        if epoch % 10 == 0 or epoch == 1:
+            self.visualize_training_history(
+                save_folder=self.args.save_folder if hasattr(self.args, "save_folder") else None
+            )
         
         return loss1_meter.avg, loss2_meter.avg, loss3_meter.avg, loss4_meter.avg
 
@@ -441,18 +717,45 @@ class PINN(nn.Module):
                 min_valid_mse = valid_mse
                 true_label, pred_label = self.Test(testloader)
                 [MAE, MAPE, MSE, RMSE] = eval_metrix(pred_label, true_label)
-                info = f'[Test] MSE: {MSE:.8f}, MAE: {MAE:.6f}, MAPE: {MAPE:.6f}, RMSE: {RMSE:.6f}'
+                r2 = r2_score(true_label, pred_label)
+                info = f'[Test] MSE: {MSE:.8f}, MAE: {MAE:.6f}, MAPE: {MAPE:.6f}, RMSE: {RMSE:.6f}, R²: {r2:.4f}'
                 self.logger.info(info)
+                
+                # Create visualization for best model
+                self.visualize_prediction_vs_true(
+                    true_label, pred_label, e,
+                    save_folder=self.args.save_folder if hasattr(self.args, "save_folder") else None
+                )
+                
                 early_stop = 0
                 self.best_model = {'solution_u': self.solution_u.state_dict(),
                                    'dynamical_F': self.dynamical_F.state_dict()}
                 if self.args.save_folder is not None:
                     np.save(os.path.join(self.args.save_folder, 'true_label.npy'), true_label)
                     np.save(os.path.join(self.args.save_folder, 'pred_label.npy'), pred_label)
+                    
+                    # Log best model metrics to wandb
+                    if hasattr(wandb, 'run') and wandb.run is not None:
+                        wandb.log({
+                            "best/epoch": e,
+                            "best/test_mse": MSE,
+                            "best/test_mae": MAE,
+                            "best/test_mape": MAPE,
+                            "best/test_rmse": RMSE,
+                            "best/test_r2": r2,
+                            "best/valid_mse": valid_mse
+                        })
+                        
             if self.args.early_stop is not None and early_stop > self.args.early_stop:
                 info = f'early stop at epoch {e}'
                 self.logger.info(info)
                 break
+        
+        # Final training history visualization
+        self.visualize_training_history(
+            save_folder=self.args.save_folder if hasattr(self.args, "save_folder") else None
+        )
+        
         self.clear_logger()
         if self.args.save_folder is not None:
             torch.save(self.best_model, os.path.join(self.args.save_folder, 'model.pth'))
@@ -484,6 +787,11 @@ if __name__ == "__main__":
         
         parser.add_argument('--log_dir', type=str, default='training_log.txt', help='log dir')
         parser.add_argument('--save_folder', type=str, default='results', help='save folder')
+        
+        # Wandb options
+        parser.add_argument('--wandb_project', type=str, default='battery-pinn', help='wandb project name')
+        parser.add_argument('--wandb_entity', type=str, default=None, help='wandb entity name')
+        parser.add_argument('--wandb_run_name', type=str, default=None, help='wandb run name')
         
         args = parser.parse_args()
         return args
