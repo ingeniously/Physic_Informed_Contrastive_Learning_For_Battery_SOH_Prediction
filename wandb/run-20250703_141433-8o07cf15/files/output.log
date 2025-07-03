@@ -1,0 +1,58 @@
+Loading original dataset...
+Original dataset loaded: 683 training batches
+Loading augmented dataset...
+Augmented dataset loaded: 2065 training batches
+Initializing PINN model...
+2025-07-03 14:14 - function:_save_args - INFO - Args:
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	csv_file:/home/choi/PICL/data_processed/preprocessed_battery_health_dataset_all_points.csv
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	csv_file_augmented:/home/choi/PICL/data_augmentation/battery_phys_augmented.csv
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	batch_size:128
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	normalization_method:z-score
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	epochs:100
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	early_stop:30
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	lr:0.0005
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	lr_F:0.0005
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	save_folder:result_small_sample_05_06_07_18
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	alpha:1.0
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	beta:0.5
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	contrastive_weight:0.1
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	pinn_weight:1.0
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	temperature:0.1
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	log_dir:training_log.txt
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	F_layers_num:4
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	F_hidden_dim:128
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	warmup_lr:0.0001
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	final_lr:1e-05
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	warmup_epochs:50
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	momentum:0.999
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	projection_dim:128
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	queue_size:4096
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	seed:42
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	wandb_project:battery-picle
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	wandb_entity:None
+2025-07-03 14:14 - function:_save_args - CRITICAL - 	wandb_run_name:None
+Could not create model visualization for wandb
+Setting up contrastive learning wrapper...
+PINN model has 41986 trainable parameters
+Full contrastive wrapper has 158594 trainable parameters
+Starting training...
+[Epoch 1/100] Current temperature: 0.2250
+[Epoch 1] Total loss: nan | PINN loss: nan | Contrastive loss: nan | PDE loss: nan | Physics loss: nan
+Traceback (most recent call last):
+  File "main.py", line 856, in <module>
+    main()
+  File "main.py", line 850, in main
+    train_contrastive_pinn(wrapper, orig_loader, aug_loader, args)
+  File "main.py", line 266, in train_contrastive_pinn
+    val_loss = wrapper.pinn.Valid(orig_loader['valid'])
+  File "/home/choi/PICL/Model/Model.py", line 523, in Valid
+    "validation/r2": r2_score(true_label, pred_label)
+  File "/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/sklearn/metrics/_regression.py", line 790, in r2_score
+    y_true, y_pred, multioutput
+  File "/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/sklearn/metrics/_regression.py", line 96, in _check_reg_targets
+    y_pred = check_array(y_pred, ensure_2d=False, dtype=dtype)
+  File "/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/sklearn/utils/validation.py", line 800, in check_array
+    _assert_all_finite(array, allow_nan=force_all_finite == "allow-nan")
+  File "/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/sklearn/utils/validation.py", line 116, in _assert_all_finite
+    type_err, msg_dtype if msg_dtype is not None else X.dtype
+ValueError: Input contains NaN, infinity or a value too large for dtype('float32').

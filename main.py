@@ -117,11 +117,10 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
     # Better learning rate schedule with warm-up and cosine decay with restarts
     scheduler = CosineAnnealingWarmRestarts(
         optimizer, 
-        T_0=10,  # Restart every 10 epochs
-        T_mult=2, # Double period after each restart
-        eta_min=args.final_lr
+        T_0=15,      # Restart every 15 epochs
+        T_mult=2,    # Double period after each restart
+        eta_min=args.final_lr * 0.1  # Lower minimum learning rate
     )
-    
     
     # Loss tracking
     train_loss_list, contrastive_loss_list, pinn_loss_list = [], [], []
@@ -143,21 +142,28 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
     best_val_loss = float('inf')
     best_epoch = 0
     patience_counter = 0
-     
+    # Dynamic temperature adjustment
+    base_temperature = args.temperature    
     for epoch in range(args.epochs):
         wrapper.train()
         total_loss_epoch, pinn_loss_epoch, contrastive_loss_epoch = [], [], []
         pde_loss_epoch, physics_loss_epoch = [], []
+        wrapper.momentum_encoder.update_momentum(epoch, args.epochs)
         
-        # Gradually decrease contrastive weight over time
-        if epoch > args.epochs // 4:
-            # Gradually reduce contrastive weight to focus more on PINN losses
-            contrastive_weight = max(0.05, args.contrastive_weight * 0.3 * (1.0 - epoch / args.epochs))
-            wrapper.contrastive_weight = contrastive_weight
-            print(f"Contrastive weight adjusted to {contrastive_weight:.4f}")
-            
-            # Log contrastive weight to wandb
-            wandb.log({"contrastive_weight": contrastive_weight})
+        
+        # Dynamic temperature schedule - start high, gradually decrease
+        base_temperature = args.temperature * 1.5
+        current_temperature = base_temperature * (1.0 + 0.5 * (1.0 - min(1.0, epoch / (0.7 * args.epochs))))
+        wrapper.temperature = current_temperature
+        
+        # Log the dynamic hyperparameters
+        wandb.log({
+            "hyperparams/momentum": wrapper.momentum_encoder.momentum,
+            "hyperparams/temperature": current_temperature,
+            "hyperparams/contrastive_weight": wrapper.contrastive_weight,
+            "epoch": epoch
+        })
+                
         
         # Reset iterators for each epoch
         orig_iter = iter(orig_loader['train'])
@@ -742,10 +748,10 @@ def get_args():
     parser.add_argument('--lr_F', type=float, default=5e-4, help='learning rate for F network')
     parser.add_argument('--save_folder', type=str, default='results', help='save folder')
     parser.add_argument('--alpha', type=float, default=1.0, help='PDE loss weight')
-    parser.add_argument('--beta', type=float, default=0.5, help='physics constraint weight')
-    parser.add_argument('--contrastive_weight', type=float, default=1.0, help='contrastive loss weight')
+    parser.add_argument('--beta', type=float, default=1.0, help='physics constraint weight')
+    parser.add_argument('--contrastive_weight', type=float, default=0.5, help='contrastive loss weight')
     parser.add_argument('--pinn_weight', type=float, default=1.0, help='PINN loss weight')
-    parser.add_argument('--temperature', type=float, default=0.07, help='contrastive temperature')
+    parser.add_argument('--temperature', type=float, default=0.005, help='contrastive temperature')
     parser.add_argument('--log_dir', type=str, default='training_log.txt', help='log dir')
     parser.add_argument('--F_layers_num', type=int, default=4, help='the layers num of F')
     parser.add_argument('--F_hidden_dim', type=int, default=128, help='the hidden dim of F')
@@ -760,6 +766,7 @@ def get_args():
     parser.add_argument('--wandb_entity', type=str, default=None, help='wandb entity (username or team name)')
     parser.add_argument('--wandb_run_name', type=str, default=None, help='wandb run name')
     return parser.parse_args()
+
 
 def set_seed(seed):
     """Set random seed for reproducibility"""
