@@ -122,6 +122,7 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
         eta_min=args.final_lr
     )
     
+    
     # Loss tracking
     train_loss_list, contrastive_loss_list, pinn_loss_list = [], [], []
     pde_loss_list, physics_loss_list = [], []

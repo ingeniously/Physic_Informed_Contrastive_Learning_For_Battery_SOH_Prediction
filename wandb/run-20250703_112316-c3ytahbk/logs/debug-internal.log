@@ -1,0 +1,17 @@
+{"time":"2025-07-03T11:23:16.646646374+09:00","level":"INFO","msg":"using version","core version":"0.18.7"}
+{"time":"2025-07-03T11:23:16.646715674+09:00","level":"INFO","msg":"created symlink","path":"/home/choi/PICL/wandb/run-20250703_112316-c3ytahbk/logs/debug-core.log"}
+{"time":"2025-07-03T11:23:16.817931974+09:00","level":"INFO","msg":"created new stream","id":"c3ytahbk"}
+{"time":"2025-07-03T11:23:16.817956174+09:00","level":"INFO","msg":"stream: started","id":"c3ytahbk"}
+{"time":"2025-07-03T11:23:16.818153874+09:00","level":"INFO","msg":"handler: started","stream_id":"c3ytahbk"}
+{"time":"2025-07-03T11:23:16.818350974+09:00","level":"INFO","msg":"sender: started","stream_id":"c3ytahbk"}
+{"time":"2025-07-03T11:23:16.818431574+09:00","level":"INFO","msg":"writer: Do: started","stream_id":"c3ytahbk"}
+{"time":"2025-07-03T11:23:17.41690447+09:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-07-03T12:54:12.009149785+09:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-07-03T12:54:12.009750585+09:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-07-03T12:54:13.009649177+09:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading media/images/final/prediction_scatter_527_f2895242ff0d04a473fc.png","runtime_seconds":0.830560693,"progress":"452.9KB/452.9KB"},{"desc":"saving job artifact","runtime_seconds":0.499393795},{"desc":"uploading config.yaml","runtime_seconds":0.226235797,"progress":"1.6KB/1.6KB"},{"desc":"uploading output.log","runtime_seconds":0.226226097,"progress":"40.0KB/40.0KB"}],"total_operations":4}}
+{"time":"2025-07-03T12:54:13.357216571+09:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-07-03T12:54:14.75227935+09:00","level":"INFO","msg":"stream: closing","id":"c3ytahbk"}
+{"time":"2025-07-03T12:54:14.75235845+09:00","level":"INFO","msg":"handler: closed","stream_id":"c3ytahbk"}
+{"time":"2025-07-03T12:54:14.75237165+09:00","level":"INFO","msg":"writer: Close: closed","stream_id":"c3ytahbk"}
+{"time":"2025-07-03T12:54:14.75241605+09:00","level":"INFO","msg":"sender: closed","stream_id":"c3ytahbk"}
+{"time":"2025-07-03T12:54:14.75243575+09:00","level":"INFO","msg":"stream: closed","id":"c3ytahbk"}
