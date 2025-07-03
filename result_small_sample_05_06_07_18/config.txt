@@ -2,14 +2,14 @@ csv_file: /home/choi/PICL/data_processed/preprocessed_battery_health_dataset_all
 csv_file_augmented: /home/choi/PICL/data_augmentation/battery_phys_augmented.csv
 batch_size: 128
 normalization_method: z-score
-epochs: 100
+epochs: 200
 early_stop: 30
 lr: 0.0005
 lr_F: 0.0005
 save_folder: result_small_sample_05_06_07_18
 alpha: 1.0
 beta: 1.0
-contrastive_weight: 0.5
+contrastive_weight: 0.7
 pinn_weight: 1.0
 temperature: 0.1
 log_dir: training_log.txt

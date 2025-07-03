@@ -23,7 +23,7 @@ class ProjectionHead(nn.Module):
         )
     
     def forward(self, x):
-        return self.net(x)  # Return unnormalized projections
+        return F.normalize(self.net(x), dim=1) # Return unnormalized projections
 
 class MomentumEncoder(nn.Module):
     """

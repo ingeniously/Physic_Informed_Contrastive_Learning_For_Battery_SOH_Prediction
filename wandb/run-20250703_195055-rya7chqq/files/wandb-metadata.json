@@ -1,0 +1,60 @@
+{
+  "os": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-debian-bookworm-sid",
+  "python": "3.7.10",
+  "startedAt": "2025-07-03T10:50:55.650400Z",
+  "args": [
+    "--csv_file",
+    "/home/choi/PICL/data_processed/preprocessed_battery_health_dataset_all_points.csv",
+    "--csv_file_augmented",
+    "/home/choi/PICL/data_augmentation/battery_phys_augmented.csv",
+    "--batch_size",
+    "128",
+    "--epochs",
+    "200",
+    "--contrastive_weight",
+    "0.7",
+    "--temperature",
+    "0.1",
+    "--lr",
+    "0.0005",
+    "--save_folder",
+    "result_small_sample_05_06_07_18"
+  ],
+  "program": "main.py",
+  "codePath": "main.py",
+  "git": {
+    "remote": "https://github.com/ingeniously/PICL.git",
+    "commit": "a84f373b5106e78ffc238ddb66e7e0a7799ebac1"
+  },
+  "email": "bassoleyipene@gmail.com",
+  "root": "/home/choi/PICL",
+  "host": "CHOI",
+  "username": "choi",
+  "executable": "/home/choi/anaconda3/envs/picl/bin/python",
+  "codePathLocal": "main.py",
+  "cpu_count": 16,
+  "cpu_count_logical": 32,
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1081101176832",
+      "used": "362612645888"
+    }
+  },
+  "memory": {
+    "total": "33529372672"
+  },
+  "cpu": {
+    "count": 16,
+    "countLogical": 32
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 4090",
+      "memoryTotal": "25757220864",
+      "architecture": "Ada"
+    }
+  ],
+  "cudaVersion": "12.6"
+}
