@@ -9,9 +9,9 @@ lr_F: 0.0005
 save_folder: result_small_sample_05_06_07_18
 alpha: 1.0
 beta: 1.0
-contrastive_weight: 0.7
+contrastive_weight: 1.0
 pinn_weight: 1.0
-temperature: 0.1
+temperature: 0.8
 log_dir: training_log.txt
 F_layers_num: 4
 F_hidden_dim: 128
@@ -22,6 +22,6 @@ momentum: 0.999
 projection_dim: 128
 queue_size: 4096
 seed: 42
-wandb_project: battery-picle
+wandb_project: battery-picle-small-dataset
 wandb_entity: None
 wandb_run_name: None

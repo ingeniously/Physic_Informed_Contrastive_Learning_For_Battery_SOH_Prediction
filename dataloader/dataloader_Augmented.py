@@ -98,7 +98,7 @@ if __name__ == '__main__':
         parser = argparse.ArgumentParser()
         parser.add_argument('--csv_file_augmented', type=str, required=True, help='Path to augmented CSV file')
         parser.add_argument('--batch_size', type=int, default=256, help='Batch size')
-        parser.add_argument('--normalization_method', type=str, default='min-max', help='min-max,z-score')
+        parser.add_argument('--normalization_method', type=str, default='z-score', help='min-max,z-score')
         return parser.parse_args()
 
     args = get_args()

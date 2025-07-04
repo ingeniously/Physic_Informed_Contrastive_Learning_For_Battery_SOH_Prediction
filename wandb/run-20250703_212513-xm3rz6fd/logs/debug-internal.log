@@ -1,0 +1,28 @@
+{"time":"2025-07-03T21:25:13.419632131+09:00","level":"INFO","msg":"using version","core version":"0.18.7"}
+{"time":"2025-07-03T21:25:13.419657931+09:00","level":"INFO","msg":"created symlink","path":"/home/choi/PICL/wandb/run-20250703_212513-xm3rz6fd/logs/debug-core.log"}
+{"time":"2025-07-03T21:25:13.614113533+09:00","level":"INFO","msg":"created new stream","id":"xm3rz6fd"}
+{"time":"2025-07-03T21:25:13.614141433+09:00","level":"INFO","msg":"stream: started","id":"xm3rz6fd"}
+{"time":"2025-07-03T21:25:13.614188833+09:00","level":"INFO","msg":"writer: Do: started","stream_id":"xm3rz6fd"}
+{"time":"2025-07-03T21:25:13.614243433+09:00","level":"INFO","msg":"handler: started","stream_id":"xm3rz6fd"}
+{"time":"2025-07-03T21:25:13.614266533+09:00","level":"INFO","msg":"sender: started","stream_id":"xm3rz6fd"}
+{"time":"2025-07-03T21:25:14.118840338+09:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-07-03T21:26:01.085085742+09:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/bassolecedric-dongguk-university/battery-picle/xm3rz6fd/file_stream\": unexpected EOF"}
+{"time":"2025-07-03T21:37:19.512159107+09:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/bassolecedric-dongguk-university/battery-picle/xm3rz6fd/file_stream\": unexpected EOF"}
+{"time":"2025-07-03T21:38:25.208915111+09:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/bassolecedric-dongguk-university/battery-picle/xm3rz6fd/file_stream\": unexpected EOF"}
+{"time":"2025-07-03T21:38:50.592265969+09:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/bassolecedric-dongguk-university/battery-picle/xm3rz6fd/file_stream\": unexpected EOF"}
+{"time":"2025-07-03T21:47:17.027766236+09:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/bassolecedric-dongguk-university/battery-picle/xm3rz6fd/file_stream\": unexpected EOF"}
+{"time":"2025-07-03T21:48:52.327005504+09:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/bassolecedric-dongguk-university/battery-picle/xm3rz6fd/file_stream\": unexpected EOF"}
+{"time":"2025-07-03T21:51:41.982735595+09:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/bassolecedric-dongguk-university/battery-picle/xm3rz6fd/file_stream\": unexpected EOF"}
+{"time":"2025-07-03T21:58:59.526478755+09:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/bassolecedric-dongguk-university/battery-picle/xm3rz6fd/file_stream\": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)"}
+{"time":"2025-07-03T22:02:49.121656684+09:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/bassolecedric-dongguk-university/battery-picle/xm3rz6fd/file_stream\": context deadline exceeded"}
+{"time":"2025-07-03T22:05:51.716386363+09:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/bassolecedric-dongguk-university/battery-picle/xm3rz6fd/file_stream\": context deadline exceeded"}
+{"time":"2025-07-03T22:21:16.332355438+09:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/bassolecedric-dongguk-university/battery-picle/xm3rz6fd/file_stream\": unexpected EOF"}
+{"time":"2025-07-03T22:58:57.138529586+09:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-07-03T22:58:57.139275786+09:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-07-03T22:58:58.139060787+09:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading media/images/final/prediction_scatter_537_69b9483b9f97cd76b4f0.png","runtime_seconds":0.807894201,"progress":"376.8KB/376.8KB"},{"desc":"saving job artifact","runtime_seconds":0.4899926},{"desc":"uploading config.yaml","runtime_seconds":0.1992921,"progress":"1.6KB/1.6KB"},{"desc":"uploading output.log","runtime_seconds":0.199283,"progress":"30.0KB/30.0KB"}],"total_operations":4}}
+{"time":"2025-07-03T22:59:00.476089629+09:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-07-03T22:59:01.848933574+09:00","level":"INFO","msg":"stream: closing","id":"xm3rz6fd"}
+{"time":"2025-07-03T22:59:01.849012274+09:00","level":"INFO","msg":"handler: closed","stream_id":"xm3rz6fd"}
+{"time":"2025-07-03T22:59:01.849023874+09:00","level":"INFO","msg":"writer: Close: closed","stream_id":"xm3rz6fd"}
+{"time":"2025-07-03T22:59:01.849065074+09:00","level":"INFO","msg":"sender: closed","stream_id":"xm3rz6fd"}
+{"time":"2025-07-03T22:59:01.849079374+09:00","level":"INFO","msg":"stream: closed","id":"xm3rz6fd"}

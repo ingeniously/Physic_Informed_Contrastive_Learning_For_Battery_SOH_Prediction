@@ -24,3 +24,10 @@ config: {'csv_file': '/home/choi/PICL/data_processed/preprocessed_battery_health
 2025-07-03 19:50:56,169 INFO    MainThread:3687191 [wandb_run.py:_redirect():2395] Redirects installed.
 2025-07-03 19:50:56,171 INFO    MainThread:3687191 [wandb_init.py:init():911] run started, returning control to user process
 2025-07-03 19:50:56,817 INFO    MainThread:3687191 [wandb_run.py:_config_callback():1387] config_cb None None {'pinn_params': 41986, 'wrapper_params': 158594, 'device': 'cpu'}
+2025-07-03 21:22:11,489 INFO    MainThread:3687191 [wandb_run.py:_finish():2155] finishing run bassolecedric-dongguk-university/battery-picle/rya7chqq
+2025-07-03 21:22:11,489 INFO    MainThread:3687191 [wandb_run.py:_atexit_cleanup():2420] got exitcode: 0
+2025-07-03 21:22:11,489 INFO    MainThread:3687191 [wandb_run.py:_restore():2402] restore
+2025-07-03 21:22:11,489 INFO    MainThread:3687191 [wandb_run.py:_restore():2408] restore done
+2025-07-03 21:22:14,146 INFO    MainThread:3687191 [wandb_run.py:_footer_history_summary_info():3960] rendering history
+2025-07-03 21:22:14,147 INFO    MainThread:3687191 [wandb_run.py:_footer_history_summary_info():3992] rendering summary
+2025-07-03 21:22:14,151 INFO    MainThread:3687191 [wandb_run.py:_footer_sync_info():3921] logging synced files

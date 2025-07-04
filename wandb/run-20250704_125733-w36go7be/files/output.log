@@ -1,0 +1,96 @@
+Original dataset loaded: 683 training batches
+Augmented dataset loaded: 2065 training batches
+Initializing PINN model...
+2025-07-04 12:57 - function:_save_args - INFO - Args:
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	csv_file:/home/choi/PICL/data_processed/preprocessed_battery_health_dataset_all_points.csv
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	csv_file_augmented:/home/choi/PICL/data_augmentation/battery_phys_augmented.csv
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	batch_size:128
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	normalization_method:z-score
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	epochs:100
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	early_stop:30
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	lr:0.001
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	lr_F:0.0005
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	save_folder:result_small_sample_05_06_07_18
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	alpha:1.0
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	beta:1.0
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	contrastive_weight:1.0
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	pinn_weight:1.0
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	temperature:0.005
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	log_dir:training_log.txt
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	F_layers_num:4
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	F_hidden_dim:128
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	warmup_lr:0.0001
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	final_lr:1e-05
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	warmup_epochs:50
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	momentum:0.999
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	projection_dim:128
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	queue_size:4096
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	seed:42
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	wandb_project:battery-picle-small-dataset
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	wandb_entity:None
+2025-07-04 12:57 - function:_save_args - CRITICAL - 	wandb_run_name:None
+Could not create model visualization for wandb
+Setting up contrastive learning ...
+Starting training...
+[Epoch 1] Total loss: 6081.1854 | PINN loss: 6071.9362 | Contrastive loss: 30.8308 | PDE loss: 0.0242 | Physics loss: 1.4319
+[Validation] Epoch 1: MSE = 5663.220215
+New best model saved at epoch 1 with validation MSE: 5663.220215
+[Test] MSE: 5484.52929688, MAE: 73.724785, MAPE: 9.678291, RMSE: 74.057610, R²: -110.5595
+[Epoch 2] Total loss: 5427.4444 | PINN loss: 5420.2168 | Contrastive loss: 24.0921 | PDE loss: 0.0050 | Physics loss: 1.1279
+[Epoch 3] Total loss: nan | PINN loss: 4923.4692 | Contrastive loss: inf | PDE loss: 0.0035 | Physics loss: 1.1640
+[Epoch 4] Total loss: nan | PINN loss: 4152.9120 | Contrastive loss: nan | PDE loss: 0.0047 | Physics loss: 1.1612
+[Epoch 5] Total loss: nan | PINN loss: 3600.0155 | Contrastive loss: nan | PDE loss: 0.0024 | Physics loss: 1.0952
+[Epoch 6] Total loss: nan | PINN loss: 3244.8603 | Contrastive loss: nan | PDE loss: 0.0021 | Physics loss: 1.0503
+[Epoch 7] Total loss: nan | PINN loss: 2971.9688 | Contrastive loss: nan | PDE loss: 0.0020 | Physics loss: 1.0048
+[Epoch 8] Total loss: nan | PINN loss: 2751.1968 | Contrastive loss: nan | PDE loss: 0.0019 | Physics loss: 0.9722
+[Epoch 9] Total loss: nan | PINN loss: 2578.8776 | Contrastive loss: nan | PDE loss: 0.0018 | Physics loss: 0.9316
+[Epoch 10] Total loss: nan | PINN loss: 2446.6436 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.9265
+[Validation] Epoch 10: MSE = 2386.474854
+New best model saved at epoch 10 with validation MSE: 2386.474854
+[Test] MSE: 2266.58349609, MAE: 47.089268, MAPE: 1.374640, RMSE: 47.608650, R²: -45.1040
+[Epoch 11] Total loss: nan | PINN loss: 2348.0081 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.9096
+[Epoch 12] Total loss: nan | PINN loss: 2281.1081 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.8977
+[Epoch 13] Total loss: nan | PINN loss: 2238.1191 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.8876
+[Epoch 14] Total loss: nan | PINN loss: 2214.1936 | Contrastive loss: nan | PDE loss: 0.0016 | Physics loss: 0.8886
+[Epoch 15] Total loss: nan | PINN loss: 2202.8110 | Contrastive loss: nan | PDE loss: 0.0016 | Physics loss: 0.8940
+[Epoch 16] Total loss: nan | PINN loss: 2048.4793 | Contrastive loss: nan | PDE loss: 0.0024 | Physics loss: 0.8653
+[Epoch 17] Total loss: nan | PINN loss: 1766.7450 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.8387
+[Epoch 18] Total loss: nan | PINN loss: 1515.6516 | Contrastive loss: nan | PDE loss: 0.0018 | Physics loss: 0.8171
+[Epoch 19] Total loss: nan | PINN loss: 1288.7124 | Contrastive loss: nan | PDE loss: 0.0018 | Physics loss: 0.8024
+[Epoch 20] Total loss: nan | PINN loss: 1089.7432 | Contrastive loss: nan | PDE loss: 0.0018 | Physics loss: 0.8125
+[Validation] Epoch 20: MSE = 998.466553
+New best model saved at epoch 20 with validation MSE: 998.466553
+[Test] MSE: 917.37481689, MAE: 29.465063, MAPE: 0.567948, RMSE: 30.288197, R²: -17.6601
+[Epoch 21] Total loss: nan | PINN loss: 913.6649 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.8008
+[Epoch 22] Total loss: nan | PINN loss: 758.9709 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.7983
+[Epoch 23] Total loss: nan | PINN loss: 627.3221 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.8090
+[Epoch 24] Total loss: nan | PINN loss: 514.3787 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.8053
+[Epoch 25] Total loss: nan | PINN loss: 420.1256 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.7940
+[Epoch 26] Total loss: nan | PINN loss: 341.4091 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.7992
+[Epoch 27] Total loss: nan | PINN loss: 278.1417 | Contrastive loss: nan | PDE loss: 0.0017 | Physics loss: 0.8053
+Traceback (most recent call last):
+  File "main.py", line 857, in <module>
+    main()
+  File "main.py", line 851, in main
+    train_contrastive_pinn(wrapper, orig_loader, aug_loader, args)
+  File "main.py", line 191, in train_contrastive_pinn
+    total_loss, pinn_loss, contrastive_loss, pde_loss, physics_loss = wrapper(x1, x2, y1, y2)
+  File "/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/choi/PICL/contrastive_Learning/contrastive.py", line 338, in forward
+    q1 = self.projection_head(z1)
+  File "/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/choi/PICL/contrastive_Learning/contrastive.py", line 26, in forward
+    return F.normalize(self.net(x), dim=1) # Return unnormalized projections
+  File "/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/torch/nn/modules/container.py", line 117, in forward
+    input = module(input)
+  File "/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/torch/nn/modules/batchnorm.py", line 136, in forward
+    self.weight, self.bias, bn_training, exponential_average_factor, self.eps)
+  File "/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/torch/nn/functional.py", line 2058, in batch_norm
+    training, momentum, eps, torch.backends.cudnn.enabled
+KeyboardInterrupt

@@ -204,9 +204,9 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
             
             # Print progress more frequently
             if (step + 1) % 1887 == 0:
-                print(f"[Epoch {epoch+1}/{args.epochs}][Step {step+1}/{n_batches}] "
-                      f"Loss: {total_loss.item():.4f} | PINN: {pinn_loss.item():.4f} | "
-                      f"Contrastive: {contrastive_loss.item():.4f} | PDE: {pde_loss.item():.4f}")
+                print(f"[Epoch {epoch+1}/{args.epochs}][Step {step+1}/{n_batches}] ")
+                       #f"Loss: {total_loss.item():.4f} | PINN: {pinn_loss.item():.4f} | "
+                       #f"Contrastive: {contrastive_loss.item():.4f} | PDE: {pde_loss.item():.4f}")
                 
                 # Log batch-level metrics to wandb
                 wandb.log({
@@ -734,24 +734,24 @@ def create_prediction_scatter(true_label, pred_label, save_path):
     plt.tight_layout()
     plt.savefig(save_path, dpi=300)
     plt.close()
-    print(f"Enhanced prediction scatter plot saved to {save_path}")
+     #print(f"Enhanced prediction scatter plot saved to {save_path}")
 
 def get_args():
     parser = argparse.ArgumentParser('Hyper Parameters')
     parser.add_argument('--csv_file', type=str, required=True, help='Path to CSV file')
     parser.add_argument('--csv_file_augmented', type=str, required=True, help='Path to augmented CSV file')
-    parser.add_argument('--batch_size', type=int, default=128, help='batch size')
+    parser.add_argument('--batch_size', type=int, default=256, help='batch size')
     parser.add_argument('--normalization_method', type=str, default='z-score', help='min-max,z-score')
-    parser.add_argument('--epochs', type=int, default=300, help='epoch')
+    parser.add_argument('--epochs', type=int, default=100, help='epoch')
     parser.add_argument('--early_stop', type=int, default=30, help='early stop patience')
-    parser.add_argument('--lr', type=float, default=0.001, help='base lr')
+    parser.add_argument('--lr', type=float, default=0.0005, help='base lr')
     parser.add_argument('--lr_F', type=float, default=5e-4, help='learning rate for F network')
     parser.add_argument('--save_folder', type=str, default='results', help='save folder')
     parser.add_argument('--alpha', type=float, default=1.0, help='PDE loss weight')
     parser.add_argument('--beta', type=float, default=1.0, help='physics constraint weight')
     parser.add_argument('--contrastive_weight', type=float, default=0.5, help='contrastive loss weight')
     parser.add_argument('--pinn_weight', type=float, default=1.0, help='PINN loss weight')
-    parser.add_argument('--temperature', type=float, default=0.005, help='contrastive temperature')
+    parser.add_argument('--temperature', type=float, default=0.1, help='contrastive temperature')
     parser.add_argument('--log_dir', type=str, default='training_log.txt', help='log dir')
     parser.add_argument('--F_layers_num', type=int, default=4, help='the layers num of F')
     parser.add_argument('--F_hidden_dim', type=int, default=128, help='the hidden dim of F')
@@ -762,7 +762,7 @@ def get_args():
     parser.add_argument('--projection_dim', type=int, default=128, help='projection dimension for contrastive learning')
     parser.add_argument('--queue_size', type=int, default=4096, help='queue size for momentum contrast')
     parser.add_argument('--seed', type=int, default=42, help='random seed')
-    parser.add_argument('--wandb_project', type=str, default='battery-picle', help='wandb project name')
+    parser.add_argument('--wandb_project', type=str, default='battery-picle-small-dataset', help='wandb project name')
     parser.add_argument('--wandb_entity', type=str, default=None, help='wandb entity (username or team name)')
     parser.add_argument('--wandb_run_name', type=str, default=None, help='wandb run name')
     return parser.parse_args()
@@ -784,7 +784,7 @@ def main():
     set_seed(args.seed)
     
     # Initialize wandb
-    run_name = args.wandb_run_name if args.wandb_run_name else f"PICLE-{pd.Timestamp.now().strftime('%Y%m%d-%H%M')}"
+    run_name = args.wandb_run_name if args.wandb_run_name else f"PICLE_small_dataset-{pd.Timestamp.now().strftime('%Y%m%d-%H%M')}"
     wandb.init(
         project=args.wandb_project,
         entity=args.wandb_entity,
@@ -806,11 +806,11 @@ def main():
     setattr(args, "save_folder", args.save_folder)
 
     # Load original and augmented data
-    print("Loading original dataset...")
+     #print("Loading original dataset...")
     orig_loader = load_data(args)
     print(f"Original dataset loaded: {len(orig_loader['train'])} training batches")
     
-    print("Loading augmented dataset...")
+    # print("Loading augmented dataset...")
     aug_loader = load_augmented_data(args)
     print(f"Augmented dataset loaded: {len(aug_loader['train'])} training batches")
 
@@ -819,7 +819,7 @@ def main():
     pinn = PINN(args)
     
     # Initialize contrastive wrapper with projection head
-    print("Setting up contrastive learning wrapper...")
+    print("Setting up contrastive learning ...")
     wrapper = ContrastivePINNWrapper(
         pinn,
         temperature=args.temperature * 1.5,  # Higher temperature for more stable gradients
@@ -836,8 +836,8 @@ def main():
     # Count parameters
     pinn_params = sum(p.numel() for p in pinn.parameters() if p.requires_grad)
     wrapper_params = sum(p.numel() for p in wrapper.parameters() if p.requires_grad)
-    print(f"PINN model has {pinn_params} trainable parameters")
-    print(f"Full contrastive wrapper has {wrapper_params} trainable parameters")
+    # print(f"PINN model has {pinn_params} trainable parameters")
+    # print(f"Full contrastive wrapper has {wrapper_params} trainable parameters")
     
     # Log model architecture to wandb
     wandb.config.update({

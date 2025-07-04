@@ -1,0 +1,17 @@
+{"time":"2025-07-04T11:50:39.804955046+09:00","level":"INFO","msg":"using version","core version":"0.18.7"}
+{"time":"2025-07-04T11:50:39.804972646+09:00","level":"INFO","msg":"created symlink","path":"/home/choi/PICL/wandb/run-20250704_115039-ljq92wcq/logs/debug-core.log"}
+{"time":"2025-07-04T11:50:39.986189345+09:00","level":"INFO","msg":"created new stream","id":"ljq92wcq"}
+{"time":"2025-07-04T11:50:39.986220245+09:00","level":"INFO","msg":"stream: started","id":"ljq92wcq"}
+{"time":"2025-07-04T11:50:39.986256345+09:00","level":"INFO","msg":"handler: started","stream_id":"ljq92wcq"}
+{"time":"2025-07-04T11:50:39.986276145+09:00","level":"INFO","msg":"writer: Do: started","stream_id":"ljq92wcq"}
+{"time":"2025-07-04T11:50:39.986311945+09:00","level":"INFO","msg":"sender: started","stream_id":"ljq92wcq"}
+{"time":"2025-07-04T11:50:40.53842234+09:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-07-04T12:15:05.82331569+09:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-07-04T12:15:05.82383679+09:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-07-04T12:15:06.824175889+09:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading media/images/final/prediction_scatter_147_9f567306c3542bc7679e.png","runtime_seconds":0.820244099,"progress":"477.4KB/477.4KB"},{"desc":"saving job artifact","runtime_seconds":0.488968599},{"desc":"uploading config.yaml","runtime_seconds":0.192780999,"progress":"1.6KB/1.6KB"},{"desc":"uploading output.log","runtime_seconds":0.192770599,"progress":"9.5KB/9.5KB"}],"total_operations":4}}
+{"time":"2025-07-04T12:15:08.890808388+09:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-07-04T12:15:10.311074187+09:00","level":"INFO","msg":"stream: closing","id":"ljq92wcq"}
+{"time":"2025-07-04T12:15:10.311149287+09:00","level":"INFO","msg":"handler: closed","stream_id":"ljq92wcq"}
+{"time":"2025-07-04T12:15:10.311162187+09:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ljq92wcq"}
+{"time":"2025-07-04T12:15:10.311187587+09:00","level":"INFO","msg":"sender: closed","stream_id":"ljq92wcq"}
+{"time":"2025-07-04T12:15:10.311222487+09:00","level":"INFO","msg":"stream: closed","id":"ljq92wcq"}

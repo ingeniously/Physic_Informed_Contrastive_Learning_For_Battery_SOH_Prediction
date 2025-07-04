@@ -1,0 +1,17 @@
+{"time":"2025-07-04T15:23:59.823188926+09:00","level":"INFO","msg":"using version","core version":"0.18.7"}
+{"time":"2025-07-04T15:23:59.823210426+09:00","level":"INFO","msg":"created symlink","path":"/home/choi/PICL/wandb/run-20250704_152359-ws3ffagd/logs/debug-core.log"}
+{"time":"2025-07-04T15:24:00.016529226+09:00","level":"INFO","msg":"created new stream","id":"ws3ffagd"}
+{"time":"2025-07-04T15:24:00.016557826+09:00","level":"INFO","msg":"stream: started","id":"ws3ffagd"}
+{"time":"2025-07-04T15:24:00.016616226+09:00","level":"INFO","msg":"writer: Do: started","stream_id":"ws3ffagd"}
+{"time":"2025-07-04T15:24:00.016670026+09:00","level":"INFO","msg":"handler: started","stream_id":"ws3ffagd"}
+{"time":"2025-07-04T15:24:00.016691926+09:00","level":"INFO","msg":"sender: started","stream_id":"ws3ffagd"}
+{"time":"2025-07-04T15:24:00.613739127+09:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-07-04T16:55:51.27480993+09:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-07-04T16:55:51.27528683+09:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-07-04T16:55:52.27536883+09:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading media/images/final/prediction_scatter_537_3c9b8045ca60c17cfe99.png","runtime_seconds":0.7977875,"progress":"400.4KB/400.4KB"},{"desc":"saving job artifact","runtime_seconds":0.4979996},{"desc":"uploading output.log","runtime_seconds":0.228328,"progress":"29.9KB/29.9KB"},{"desc":"uploading config.yaml","runtime_seconds":0.228319,"progress":"1.6KB/1.6KB"}],"total_operations":4}}
+{"time":"2025-07-04T16:55:52.633851929+09:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-07-04T16:55:53.991507029+09:00","level":"INFO","msg":"stream: closing","id":"ws3ffagd"}
+{"time":"2025-07-04T16:55:53.991552429+09:00","level":"INFO","msg":"handler: closed","stream_id":"ws3ffagd"}
+{"time":"2025-07-04T16:55:53.991565529+09:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ws3ffagd"}
+{"time":"2025-07-04T16:55:53.991588029+09:00","level":"INFO","msg":"sender: closed","stream_id":"ws3ffagd"}
+{"time":"2025-07-04T16:55:53.991624329+09:00","level":"INFO","msg":"stream: closed","id":"ws3ffagd"}

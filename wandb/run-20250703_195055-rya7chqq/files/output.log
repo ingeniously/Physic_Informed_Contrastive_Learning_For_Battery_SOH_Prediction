@@ -277,3 +277,41 @@ New best model saved at epoch 170 with validation MSE: 0.050589
 Enhanced prediction scatter plot saved to result_small_sample_05_06_07_18/prediction_scatter_epoch_170.png
 [Epoch 171] Total loss: 0.7932 | PINN loss: 0.6555 | Contrastive loss: 4.6688 | PDE loss: 0.0015 | Physics loss: 0.0123
 [Epoch 172] Total loss: 0.8025 | PINN loss: 0.6632 | Contrastive loss: 4.6710 | PDE loss: 0.0015 | Physics loss: 0.0128
+[Epoch 173] Total loss: 0.7966 | PINN loss: 0.6584 | Contrastive loss: 4.6680 | PDE loss: 0.0016 | Physics loss: 0.0128
+[Epoch 174] Total loss: 0.7924 | PINN loss: 0.6549 | Contrastive loss: 4.6698 | PDE loss: 0.0015 | Physics loss: 0.0132
+[Epoch 175] Total loss: 0.7930 | PINN loss: 0.6554 | Contrastive loss: 4.6714 | PDE loss: 0.0015 | Physics loss: 0.0123
+[Epoch 176] Total loss: 0.7904 | PINN loss: 0.6533 | Contrastive loss: 4.6659 | PDE loss: 0.0016 | Physics loss: 0.0125
+[Epoch 177] Total loss: 0.7951 | PINN loss: 0.6571 | Contrastive loss: 4.6671 | PDE loss: 0.0015 | Physics loss: 0.0132
+[Epoch 178] Total loss: 0.7901 | PINN loss: 0.6530 | Contrastive loss: 4.6672 | PDE loss: 0.0015 | Physics loss: 0.0129
+[Epoch 179] Total loss: 0.7930 | PINN loss: 0.6554 | Contrastive loss: 4.6704 | PDE loss: 0.0015 | Physics loss: 0.0122
+[Epoch 180] Total loss: 0.7922 | PINN loss: 0.6547 | Contrastive loss: 4.6670 | PDE loss: 0.0015 | Physics loss: 0.0133
+[Validation] Epoch 180: MSE = 0.053193
+[Epoch 181] Total loss: 0.7990 | PINN loss: 0.6604 | Contrastive loss: 4.6685 | PDE loss: 0.0015 | Physics loss: 0.0130
+[Epoch 182] Total loss: 0.7878 | PINN loss: 0.6511 | Contrastive loss: 4.6655 | PDE loss: 0.0015 | Physics loss: 0.0125
+[Epoch 183] Total loss: 0.7872 | PINN loss: 0.6506 | Contrastive loss: 4.6647 | PDE loss: 0.0015 | Physics loss: 0.0128
+[Epoch 184] Total loss: 0.7920 | PINN loss: 0.6546 | Contrastive loss: 4.6681 | PDE loss: 0.0015 | Physics loss: 0.0130
+[Epoch 185] Total loss: 0.7813 | PINN loss: 0.6457 | Contrastive loss: 4.6669 | PDE loss: 0.0015 | Physics loss: 0.0119
+[Epoch 186] Total loss: 0.7884 | PINN loss: 0.6516 | Contrastive loss: 4.6666 | PDE loss: 0.0015 | Physics loss: 0.0124
+[Epoch 187] Total loss: 0.7851 | PINN loss: 0.6489 | Contrastive loss: 4.6645 | PDE loss: 0.0015 | Physics loss: 0.0128
+[Epoch 188] Total loss: 0.7895 | PINN loss: 0.6525 | Contrastive loss: 4.6647 | PDE loss: 0.0015 | Physics loss: 0.0131
+[Epoch 189] Total loss: 0.7818 | PINN loss: 0.6461 | Contrastive loss: 4.6671 | PDE loss: 0.0015 | Physics loss: 0.0122
+[Epoch 190] Total loss: 0.7826 | PINN loss: 0.6468 | Contrastive loss: 4.6646 | PDE loss: 0.0015 | Physics loss: 0.0123
+[Validation] Epoch 190: MSE = 0.050669
+[Epoch 191] Total loss: 0.7865 | PINN loss: 0.6500 | Contrastive loss: 4.6645 | PDE loss: 0.0015 | Physics loss: 0.0126
+[Epoch 192] Total loss: 0.7850 | PINN loss: 0.6487 | Contrastive loss: 4.6649 | PDE loss: 0.0015 | Physics loss: 0.0139
+[Epoch 193] Total loss: 0.7842 | PINN loss: 0.6481 | Contrastive loss: 4.6639 | PDE loss: 0.0015 | Physics loss: 0.0132
+[Epoch 194] Total loss: 0.7844 | PINN loss: 0.6483 | Contrastive loss: 4.6644 | PDE loss: 0.0015 | Physics loss: 0.0123
+[Epoch 195] Total loss: 0.7857 | PINN loss: 0.6493 | Contrastive loss: 4.6629 | PDE loss: 0.0015 | Physics loss: 0.0132
+[Epoch 196] Total loss: 0.7807 | PINN loss: 0.6452 | Contrastive loss: 4.6654 | PDE loss: 0.0015 | Physics loss: 0.0130
+[Epoch 197] Total loss: 0.7842 | PINN loss: 0.6481 | Contrastive loss: 4.6655 | PDE loss: 0.0015 | Physics loss: 0.0124
+[Epoch 198] Total loss: 0.7834 | PINN loss: 0.6474 | Contrastive loss: 4.6645 | PDE loss: 0.0015 | Physics loss: 0.0125
+[Epoch 199] Total loss: 0.7836 | PINN loss: 0.6476 | Contrastive loss: 4.6629 | PDE loss: 0.0015 | Physics loss: 0.0131
+[Epoch 200] Total loss: 0.7821 | PINN loss: 0.6464 | Contrastive loss: 4.6632 | PDE loss: 0.0015 | Physics loss: 0.0125
+[Validation] Epoch 200: MSE = 0.055666
+/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/numpy/lib/function_base.py:2559: RuntimeWarning: invalid value encountered in true_divide
+  c /= stddev[:, None]
+/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/numpy/lib/function_base.py:2560: RuntimeWarning: invalid value encountered in true_divide
+  c /= stddev[None, :]
+Enhanced prediction scatter plot saved to result_small_sample_05_06_07_18/final_prediction_scatter.png
+Could not load best model for final visualization: name 'stats' is not defined
+Training completed. Best model at epoch 170 with validation MSE: 0.050589

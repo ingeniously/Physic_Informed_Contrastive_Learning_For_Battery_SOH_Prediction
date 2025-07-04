@@ -29,7 +29,7 @@ metadata['battery_id'] = metadata['battery_id'].astype(str)
 # ("The experiments were carried out until the experiment control software crashed")
 excluded_batteries = ['B0049', 'B0050', 'B0051', 'B0052',
                       'B0025', 'B0026', 'B0027', 'B0028',
-                      'B0029', 'B0030', 'B0031', 'B0032',
+                     'B0029', 'B0030', 'B0031', 'B0032',
                       'B0033', 'B0034', 'B0036',
                       'B0038', 'B0039', 'B0040', 
                       'B0041', 'B0042', 'B0043', 'B0044',

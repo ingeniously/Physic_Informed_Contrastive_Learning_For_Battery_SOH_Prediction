@@ -1,0 +1,299 @@
+Loading original dataset...
+Original dataset loaded: 683 training batches
+Loading augmented dataset...
+Augmented dataset loaded: 2065 training batches
+Initializing PINN model...
+2025-07-03 21:25 - function:_save_args - INFO - Args:
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	csv_file:/home/choi/PICL/data_processed/preprocessed_battery_health_dataset_all_points.csv
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	csv_file_augmented:/home/choi/PICL/data_augmentation/battery_phys_augmented.csv
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	batch_size:128
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	normalization_method:z-score
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	epochs:200
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	early_stop:30
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	lr:0.0005
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	lr_F:0.0005
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	save_folder:result_small_sample_05_06_07_18
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	alpha:1.0
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	beta:1.0
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	contrastive_weight:0.7
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	pinn_weight:1.0
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	temperature:0.1
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	log_dir:training_log.txt
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	F_layers_num:4
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	F_hidden_dim:128
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	warmup_lr:0.0001
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	final_lr:1e-05
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	warmup_epochs:50
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	momentum:0.999
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	projection_dim:128
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	queue_size:4096
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	seed:42
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	wandb_project:battery-picle
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	wandb_entity:None
+2025-07-03 21:25 - function:_save_args - CRITICAL - 	wandb_run_name:None
+Could not create model visualization for wandb
+Setting up contrastive learning wrapper...
+Starting training...
+[Epoch 1] Total loss: 6297.3310 | PINN loss: 6296.3625 | Contrastive loss: 4.6117 | PDE loss: 0.0383 | Physics loss: 1.7090
+[Validation] Epoch 1: MSE = 5948.886719
+New best model saved at epoch 1 with validation MSE: 5948.886719
+[Test] MSE: 5766.08837891, MAE: 75.610153, MAPE: 13.193356, RMSE: 75.934761, R²: -116.2867
+[Epoch 2] Total loss: 5831.2591 | PINN loss: 5830.2940 | Contrastive loss: 4.5954 | PDE loss: 0.0077 | Physics loss: 1.1595
+[Epoch 3] Total loss: 5557.8559 | PINN loss: 5556.8918 | Contrastive loss: 4.5911 | PDE loss: 0.0050 | Physics loss: 1.1181
+[Epoch 4] Total loss: 5312.4073 | PINN loss: 5311.4439 | Contrastive loss: 4.5876 | PDE loss: 0.0038 | Physics loss: 1.1019
+[Epoch 5] Total loss: 5094.6639 | PINN loss: 5093.7006 | Contrastive loss: 4.5871 | PDE loss: 0.0032 | Physics loss: 1.1085
+[Epoch 6] Total loss: 4898.4733 | PINN loss: 4897.5103 | Contrastive loss: 4.5853 | PDE loss: 0.0028 | Physics loss: 1.1049
+[Epoch 7] Total loss: 4730.2108 | PINN loss: 4729.2481 | Contrastive loss: 4.5841 | PDE loss: 0.0025 | Physics loss: 1.1048
+[Epoch 8] Total loss: 4584.4543 | PINN loss: 4583.4918 | Contrastive loss: 4.5834 | PDE loss: 0.0023 | Physics loss: 1.1023
+[Epoch 9] Total loss: 4465.8753 | PINN loss: 4464.9133 | Contrastive loss: 4.5810 | PDE loss: 0.0022 | Physics loss: 1.0963
+[Epoch 10] Total loss: 4377.9544 | PINN loss: 4376.9926 | Contrastive loss: 4.5800 | PDE loss: 0.0021 | Physics loss: 1.0856
+[Validation] Epoch 10: MSE = 4324.235352
+New best model saved at epoch 10 with validation MSE: 4324.235352
+[Test] MSE: 4166.77490234, MAE: 64.168442, MAPE: 3.735966, RMSE: 64.550560, R²: -83.7554
+[Epoch 11] Total loss: 4307.4840 | PINN loss: 4306.5226 | Contrastive loss: 4.5782 | PDE loss: 0.0020 | Physics loss: 1.0596
+[Epoch 12] Total loss: 4256.4750 | PINN loss: 4255.5140 | Contrastive loss: 4.5764 | PDE loss: 0.0020 | Physics loss: 1.0710
+[Epoch 13] Total loss: 4228.1987 | PINN loss: 4227.2375 | Contrastive loss: 4.5769 | PDE loss: 0.0019 | Physics loss: 1.0616
+[Epoch 14] Total loss: 4210.3031 | PINN loss: 4209.3420 | Contrastive loss: 4.5767 | PDE loss: 0.0019 | Physics loss: 1.0588
+[Epoch 15] Total loss: 4201.3555 | PINN loss: 4200.3945 | Contrastive loss: 4.5761 | PDE loss: 0.0019 | Physics loss: 1.0724
+[Epoch 16] Total loss: 4088.4775 | PINN loss: 4087.5155 | Contrastive loss: 4.5813 | PDE loss: 0.0020 | Physics loss: 1.0522
+[Epoch 17] Total loss: 3873.5873 | PINN loss: 3872.6252 | Contrastive loss: 4.5815 | PDE loss: 0.0019 | Physics loss: 1.0345
+[Epoch 18] Total loss: 3660.3356 | PINN loss: 3659.3732 | Contrastive loss: 4.5828 | PDE loss: 0.0019 | Physics loss: 1.0159
+[Epoch 19] Total loss: 3456.4544 | PINN loss: 3455.4923 | Contrastive loss: 4.5817 | PDE loss: 0.0018 | Physics loss: 0.9793
+[Epoch 20] Total loss: 3264.3225 | PINN loss: 3263.3604 | Contrastive loss: 4.5815 | PDE loss: 0.0018 | Physics loss: 0.9644
+[Validation] Epoch 20: MSE = 3163.872559
+New best model saved at epoch 20 with validation MSE: 3163.872559
+[Test] MSE: 3027.55297852, MAE: 54.574474, MAPE: 2.038613, RMSE: 55.023205, R²: -60.5827
+[Epoch 21] Total loss: 3079.6523 | PINN loss: 3078.6902 | Contrastive loss: 4.5816 | PDE loss: 0.0017 | Physics loss: 0.9422
+[Epoch 22] Total loss: 2904.7700 | PINN loss: 2903.8078 | Contrastive loss: 4.5819 | PDE loss: 0.0017 | Physics loss: 0.9013
+[Epoch 23] Total loss: 2739.8350 | PINN loss: 2738.8729 | Contrastive loss: 4.5814 | PDE loss: 0.0017 | Physics loss: 0.8932
+[Epoch 24] Total loss: 2586.8585 | PINN loss: 2585.8968 | Contrastive loss: 4.5794 | PDE loss: 0.0017 | Physics loss: 0.8860
+[Epoch 25] Total loss: 2445.9419 | PINN loss: 2444.9799 | Contrastive loss: 4.5809 | PDE loss: 0.0017 | Physics loss: 0.8685
+[Epoch 26] Total loss: 2316.2525 | PINN loss: 2315.2905 | Contrastive loss: 4.5807 | PDE loss: 0.0016 | Physics loss: 0.8571
+[Epoch 27] Total loss: 2196.0011 | PINN loss: 2195.0395 | Contrastive loss: 4.5790 | PDE loss: 0.0017 | Physics loss: 0.8373
+[Epoch 28] Total loss: 2088.3218 | PINN loss: 2087.3601 | Contrastive loss: 4.5796 | PDE loss: 0.0016 | Physics loss: 0.8246
+[Epoch 29] Total loss: 1989.3073 | PINN loss: 1988.3459 | Contrastive loss: 4.5783 | PDE loss: 0.0016 | Physics loss: 0.8210
+[Epoch 30] Total loss: 1901.7822 | PINN loss: 1900.8207 | Contrastive loss: 4.5782 | PDE loss: 0.0016 | Physics loss: 0.8150
+[Validation] Epoch 30: MSE = 1860.051270
+New best model saved at epoch 30 with validation MSE: 1860.051270
+[Test] MSE: 1752.96569824, MAE: 41.276875, MAPE: 1.030167, RMSE: 41.868435, R²: -34.6567
+[Epoch 31] Total loss: 1822.2690 | PINN loss: 1821.3075 | Contrastive loss: 4.5784 | PDE loss: 0.0016 | Physics loss: 0.8142
+[Epoch 32] Total loss: 1752.8950 | PINN loss: 1751.9339 | Contrastive loss: 4.5769 | PDE loss: 0.0016 | Physics loss: 0.8131
+[Epoch 33] Total loss: 1693.1837 | PINN loss: 1692.2225 | Contrastive loss: 4.5772 | PDE loss: 0.0016 | Physics loss: 0.8186
+[Epoch 34] Total loss: 1641.9828 | PINN loss: 1641.0219 | Contrastive loss: 4.5759 | PDE loss: 0.0016 | Physics loss: 0.8053
+[Epoch 35] Total loss: 1596.1281 | PINN loss: 1595.1670 | Contrastive loss: 4.5766 | PDE loss: 0.0016 | Physics loss: 0.8060
+[Epoch 36] Total loss: 1558.7690 | PINN loss: 1557.8081 | Contrastive loss: 4.5755 | PDE loss: 0.0015 | Physics loss: 0.8075
+[Epoch 37] Total loss: 1525.4091 | PINN loss: 1524.4486 | Contrastive loss: 4.5742 | PDE loss: 0.0016 | Physics loss: 0.7992
+[Epoch 38] Total loss: 1501.0639 | PINN loss: 1500.1031 | Contrastive loss: 4.5756 | PDE loss: 0.0016 | Physics loss: 0.8104
+[Epoch 39] Total loss: 1481.5405 | PINN loss: 1480.5798 | Contrastive loss: 4.5748 | PDE loss: 0.0015 | Physics loss: 0.8071
+[Epoch 40] Total loss: 1465.0964 | PINN loss: 1464.1360 | Contrastive loss: 4.5737 | PDE loss: 0.0015 | Physics loss: 0.8014
+[Validation] Epoch 40: MSE = 1460.012939
+New best model saved at epoch 40 with validation MSE: 1460.012939
+[Test] MSE: 1363.96875000, MAE: 36.259945, MAPE: 0.804256, RMSE: 36.931946, R²: -26.7442
+[Epoch 41] Total loss: 1453.5049 | PINN loss: 1452.5442 | Contrastive loss: 4.5747 | PDE loss: 0.0015 | Physics loss: 0.8089
+[Epoch 42] Total loss: 1445.3299 | PINN loss: 1444.3694 | Contrastive loss: 4.5737 | PDE loss: 0.0015 | Physics loss: 0.8031
+[Epoch 43] Total loss: 1441.7057 | PINN loss: 1440.7452 | Contrastive loss: 4.5741 | PDE loss: 0.0015 | Physics loss: 0.8093
+[Epoch 44] Total loss: 1437.6963 | PINN loss: 1436.7357 | Contrastive loss: 4.5743 | PDE loss: 0.0015 | Physics loss: 0.8094
+[Epoch 45] Total loss: 1438.3659 | PINN loss: 1437.4054 | Contrastive loss: 4.5737 | PDE loss: 0.0015 | Physics loss: 0.8105
+[Epoch 46] Total loss: 1372.2484 | PINN loss: 1371.2870 | Contrastive loss: 4.5781 | PDE loss: 0.0017 | Physics loss: 0.8083
+[Epoch 47] Total loss: 1250.0838 | PINN loss: 1249.1222 | Contrastive loss: 4.5793 | PDE loss: 0.0017 | Physics loss: 0.8046
+[Epoch 48] Total loss: 1132.7002 | PINN loss: 1131.7381 | Contrastive loss: 4.5815 | PDE loss: 0.0016 | Physics loss: 0.8082
+[Epoch 49] Total loss: 1022.7983 | PINN loss: 1021.8362 | Contrastive loss: 4.5813 | PDE loss: 0.0016 | Physics loss: 0.8125
+[Epoch 50] Total loss: 917.4181 | PINN loss: 916.4559 | Contrastive loss: 4.5822 | PDE loss: 0.0016 | Physics loss: 0.8068
+[Validation] Epoch 50: MSE = 869.459412
+New best model saved at epoch 50 with validation MSE: 869.459412
+[Test] MSE: 793.18438721, MAE: 27.276348, MAPE: 0.504477, RMSE: 28.163528, R²: -15.1340
+[Epoch 51] Total loss: 820.5877 | PINN loss: 819.6256 | Contrastive loss: 4.5817 | PDE loss: 0.0016 | Physics loss: 0.7989
+[Epoch 52] Total loss: 729.2427 | PINN loss: 728.2804 | Contrastive loss: 4.5825 | PDE loss: 0.0016 | Physics loss: 0.8051
+[Epoch 53] Total loss: 646.1625 | PINN loss: 645.2001 | Contrastive loss: 4.5829 | PDE loss: 0.0016 | Physics loss: 0.8075
+[Epoch 54] Total loss: 567.7993 | PINN loss: 566.8369 | Contrastive loss: 4.5828 | PDE loss: 0.0016 | Physics loss: 0.8065
+[Epoch 55] Total loss: 496.8387 | PINN loss: 495.8763 | Contrastive loss: 4.5829 | PDE loss: 0.0016 | Physics loss: 0.8048
+[Epoch 56] Total loss: 431.3902 | PINN loss: 430.4277 | Contrastive loss: 4.5834 | PDE loss: 0.0016 | Physics loss: 0.8059
+[Epoch 57] Total loss: 371.7714 | PINN loss: 370.8089 | Contrastive loss: 4.5831 | PDE loss: 0.0016 | Physics loss: 0.8113
+[Epoch 58] Total loss: 318.2714 | PINN loss: 317.3088 | Contrastive loss: 4.5839 | PDE loss: 0.0016 | Physics loss: 0.8124
+[Epoch 59] Total loss: 271.4005 | PINN loss: 270.4378 | Contrastive loss: 4.5839 | PDE loss: 0.0016 | Physics loss: 0.8088
+[Epoch 60] Total loss: 229.6507 | PINN loss: 228.6881 | Contrastive loss: 4.5840 | PDE loss: 0.0016 | Physics loss: 0.8072
+[Validation] Epoch 60: MSE = 210.695602
+New best model saved at epoch 60 with validation MSE: 210.695602
+[Test] MSE: 170.23432922, MAE: 11.011707, MAPE: 0.156546, RMSE: 13.047388, R²: -2.4627
+[Epoch 61] Total loss: 193.7001 | PINN loss: 192.7378 | Contrastive loss: 4.5821 | PDE loss: 0.0016 | Physics loss: 0.7960
+[Epoch 62] Total loss: 162.2219 | PINN loss: 161.2606 | Contrastive loss: 4.5775 | PDE loss: 0.0016 | Physics loss: 0.6008
+[Epoch 63] Total loss: 135.9336 | PINN loss: 134.9727 | Contrastive loss: 4.5755 | PDE loss: 0.0017 | Physics loss: 0.3213
+[Epoch 64] Total loss: 113.2837 | PINN loss: 112.3230 | Contrastive loss: 4.5747 | PDE loss: 0.0018 | Physics loss: 0.1512
+[Epoch 65] Total loss: 92.8731 | PINN loss: 91.9124 | Contrastive loss: 4.5746 | PDE loss: 0.0022 | Physics loss: 0.1451
+[Epoch 66] Total loss: 75.6422 | PINN loss: 74.6825 | Contrastive loss: 4.5700 | PDE loss: 0.0021 | Physics loss: 0.1286
+[Epoch 67] Total loss: 61.5676 | PINN loss: 60.6086 | Contrastive loss: 4.5665 | PDE loss: 0.0020 | Physics loss: 0.1056
+[Epoch 68] Total loss: 49.5635 | PINN loss: 48.6045 | Contrastive loss: 4.5667 | PDE loss: 0.0019 | Physics loss: 0.0912
+[Epoch 69] Total loss: 40.1466 | PINN loss: 39.1877 | Contrastive loss: 4.5661 | PDE loss: 0.0019 | Physics loss: 0.0902
+[Epoch 70] Total loss: 31.8829 | PINN loss: 30.9244 | Contrastive loss: 4.5643 | PDE loss: 0.0018 | Physics loss: 0.0826
+[Validation] Epoch 70: MSE = 27.598732
+New best model saved at epoch 70 with validation MSE: 27.598732
+[Test] MSE: 13.21088600, MAE: 2.243193, MAPE: 0.027084, RMSE: 3.634678, R²: 0.7313
+[Epoch 71] Total loss: 25.4470 | PINN loss: 24.4886 | Contrastive loss: 4.5641 | PDE loss: 0.0018 | Physics loss: 0.0731
+[Epoch 72] Total loss: 20.3733 | PINN loss: 19.4155 | Contrastive loss: 4.5613 | PDE loss: 0.0018 | Physics loss: 0.0647
+[Epoch 73] Total loss: 16.1824 | PINN loss: 15.2241 | Contrastive loss: 4.5633 | PDE loss: 0.0018 | Physics loss: 0.0611
+[Epoch 74] Total loss: 12.9914 | PINN loss: 12.0327 | Contrastive loss: 4.5654 | PDE loss: 0.0017 | Physics loss: 0.0577
+[Epoch 75] Total loss: 10.5826 | PINN loss: 9.6240 | Contrastive loss: 4.5653 | PDE loss: 0.0018 | Physics loss: 0.0497
+[Epoch 76] Total loss: 8.6882 | PINN loss: 7.7294 | Contrastive loss: 4.5665 | PDE loss: 0.0017 | Physics loss: 0.0491
+[Epoch 77] Total loss: 7.2932 | PINN loss: 6.3393 | Contrastive loss: 4.5661 | PDE loss: 0.0017 | Physics loss: 0.0471
+[Epoch 78] Total loss: 6.1036 | PINN loss: 5.1749 | Contrastive loss: 4.5692 | PDE loss: 0.0017 | Physics loss: 0.0437
+[Epoch 79] Total loss: 5.2263 | PINN loss: 4.3633 | Contrastive loss: 4.5709 | PDE loss: 0.0017 | Physics loss: 0.0431
+[Epoch 80] Total loss: 4.4936 | PINN loss: 3.7243 | Contrastive loss: 4.5724 | PDE loss: 0.0017 | Physics loss: 0.0397
+[Validation] Epoch 80: MSE = 2.765790
+New best model saved at epoch 80 with validation MSE: 2.765790
+[Test] MSE: 0.34519643, MAE: 0.438415, MAPE: 0.005258, RMSE: 0.587534, R²: 0.9930
+[Epoch 81] Total loss: 3.8863 | PINN loss: 3.2137 | Contrastive loss: 4.5731 | PDE loss: 0.0017 | Physics loss: 0.0373
+[Epoch 82] Total loss: 3.4482 | PINN loss: 2.8508 | Contrastive loss: 4.5772 | PDE loss: 0.0017 | Physics loss: 0.0358
+[Epoch 83] Total loss: 3.1022 | PINN loss: 2.5639 | Contrastive loss: 4.5807 | PDE loss: 0.0017 | Physics loss: 0.0336
+[Epoch 84] Total loss: 2.8170 | PINN loss: 2.3281 | Contrastive loss: 4.5852 | PDE loss: 0.0017 | Physics loss: 0.0277
+[Epoch 85] Total loss: 2.5581 | PINN loss: 2.1142 | Contrastive loss: 4.5876 | PDE loss: 0.0017 | Physics loss: 0.0265
+[Epoch 86] Total loss: 2.3745 | PINN loss: 1.9624 | Contrastive loss: 4.5921 | PDE loss: 0.0016 | Physics loss: 0.0233
+[Epoch 87] Total loss: 2.2205 | PINN loss: 1.8352 | Contrastive loss: 4.5955 | PDE loss: 0.0016 | Physics loss: 0.0220
+[Epoch 88] Total loss: 2.0559 | PINN loss: 1.6991 | Contrastive loss: 4.5956 | PDE loss: 0.0016 | Physics loss: 0.0218
+[Epoch 89] Total loss: 1.9438 | PINN loss: 1.6064 | Contrastive loss: 4.6018 | PDE loss: 0.0016 | Physics loss: 0.0220
+[Epoch 90] Total loss: 1.8643 | PINN loss: 1.5407 | Contrastive loss: 4.6060 | PDE loss: 0.0016 | Physics loss: 0.0218
+[Validation] Epoch 90: MSE = 0.835685
+New best model saved at epoch 90 with validation MSE: 0.835685
+[Test] MSE: 0.05191017, MAE: 0.192329, MAPE: 0.002383, RMSE: 0.227838, R²: 0.9989
+[Epoch 91] Total loss: 1.7600 | PINN loss: 1.4546 | Contrastive loss: 4.6142 | PDE loss: 0.0016 | Physics loss: 0.0204
+[Epoch 92] Total loss: 1.7081 | PINN loss: 1.4117 | Contrastive loss: 4.6177 | PDE loss: 0.0016 | Physics loss: 0.0191
+[Epoch 93] Total loss: 1.6445 | PINN loss: 1.3591 | Contrastive loss: 4.6221 | PDE loss: 0.0016 | Physics loss: 0.0188
+[Epoch 94] Total loss: 1.6005 | PINN loss: 1.3227 | Contrastive loss: 4.6290 | PDE loss: 0.0016 | Physics loss: 0.0190
+[Epoch 95] Total loss: 1.5671 | PINN loss: 1.2951 | Contrastive loss: 4.6359 | PDE loss: 0.0016 | Physics loss: 0.0178
+[Epoch 96] Total loss: 1.5263 | PINN loss: 1.2614 | Contrastive loss: 4.6405 | PDE loss: 0.0016 | Physics loss: 0.0185
+[Epoch 97] Total loss: 1.5060 | PINN loss: 1.2446 | Contrastive loss: 4.6476 | PDE loss: 0.0016 | Physics loss: 0.0189
+[Epoch 98] Total loss: 1.4875 | PINN loss: 1.2293 | Contrastive loss: 4.6566 | PDE loss: 0.0016 | Physics loss: 0.0179
+[Epoch 99] Total loss: 1.4778 | PINN loss: 1.2213 | Contrastive loss: 4.6623 | PDE loss: 0.0016 | Physics loss: 0.0178
+[Epoch 100] Total loss: 1.4569 | PINN loss: 1.2041 | Contrastive loss: 4.6733 | PDE loss: 0.0016 | Physics loss: 0.0182
+[Validation] Epoch 100: MSE = 0.540973
+New best model saved at epoch 100 with validation MSE: 0.540973
+[Test] MSE: 0.04420931, MAE: 0.176973, MAPE: 0.002212, RMSE: 0.210260, R²: 0.9991
+[Epoch 101] Total loss: 1.4522 | PINN loss: 1.2002 | Contrastive loss: 4.6802 | PDE loss: 0.0016 | Physics loss: 0.0178
+[Epoch 102] Total loss: 1.4427 | PINN loss: 1.1923 | Contrastive loss: 4.6901 | PDE loss: 0.0016 | Physics loss: 0.0185
+[Epoch 103] Total loss: 1.4436 | PINN loss: 1.1930 | Contrastive loss: 4.6990 | PDE loss: 0.0016 | Physics loss: 0.0187
+[Epoch 104] Total loss: 1.4484 | PINN loss: 1.1970 | Contrastive loss: 4.7095 | PDE loss: 0.0016 | Physics loss: 0.0187
+[Epoch 105] Total loss: 1.4336 | PINN loss: 1.1848 | Contrastive loss: 4.7205 | PDE loss: 0.0016 | Physics loss: 0.0182
+[Epoch 106] Total loss: 1.3829 | PINN loss: 1.1429 | Contrastive loss: 4.7380 | PDE loss: 0.0021 | Physics loss: 0.0184
+[Epoch 107] Total loss: 1.2551 | PINN loss: 1.0373 | Contrastive loss: 4.7488 | PDE loss: 0.0018 | Physics loss: 0.0173
+[Epoch 108] Total loss: 1.1664 | PINN loss: 0.9640 | Contrastive loss: 4.7582 | PDE loss: 0.0018 | Physics loss: 0.0164
+[Epoch 109] Total loss: 1.0958 | PINN loss: 0.9056 | Contrastive loss: 4.7700 | PDE loss: 0.0018 | Physics loss: 0.0166
+[Epoch 110] Total loss: 1.0465 | PINN loss: 0.8649 | Contrastive loss: 4.7798 | PDE loss: 0.0017 | Physics loss: 0.0161
+[Validation] Epoch 110: MSE = 0.192231
+New best model saved at epoch 110 with validation MSE: 0.192231
+[Test] MSE: 0.03528280, MAE: 0.151078, MAPE: 0.001854, RMSE: 0.187837, R²: 0.9993
+[Epoch 111] Total loss: 1.0034 | PINN loss: 0.8293 | Contrastive loss: 4.7923 | PDE loss: 0.0017 | Physics loss: 0.0151
+[Epoch 112] Total loss: 0.9850 | PINN loss: 0.8141 | Contrastive loss: 4.8037 | PDE loss: 0.0018 | Physics loss: 0.0156
+[Epoch 113] Total loss: 0.9627 | PINN loss: 0.7956 | Contrastive loss: 4.8154 | PDE loss: 0.0017 | Physics loss: 0.0148
+[Epoch 114] Total loss: 0.9488 | PINN loss: 0.7842 | Contrastive loss: 4.8275 | PDE loss: 0.0017 | Physics loss: 0.0144
+[Epoch 115] Total loss: 0.9436 | PINN loss: 0.7798 | Contrastive loss: 4.8393 | PDE loss: 0.0018 | Physics loss: 0.0148
+[Epoch 116] Total loss: 0.9335 | PINN loss: 0.7715 | Contrastive loss: 4.8515 | PDE loss: 0.0017 | Physics loss: 0.0155
+[Epoch 117] Total loss: 0.9228 | PINN loss: 0.7626 | Contrastive loss: 4.8649 | PDE loss: 0.0017 | Physics loss: 0.0151
+[Epoch 118] Total loss: 0.9085 | PINN loss: 0.7508 | Contrastive loss: 4.8757 | PDE loss: 0.0018 | Physics loss: 0.0139
+[Epoch 119] Total loss: 0.9083 | PINN loss: 0.7506 | Contrastive loss: 4.8894 | PDE loss: 0.0017 | Physics loss: 0.0144
+[Epoch 120] Total loss: 0.9020 | PINN loss: 0.7455 | Contrastive loss: 4.8990 | PDE loss: 0.0017 | Physics loss: 0.0144
+[Validation] Epoch 120: MSE = 0.102770
+New best model saved at epoch 120 with validation MSE: 0.102770
+[Test] MSE: 0.04411654, MAE: 0.163935, MAPE: 0.001957, RMSE: 0.210039, R²: 0.9991
+[Epoch 121] Total loss: 0.9006 | PINN loss: 0.7443 | Contrastive loss: 4.9107 | PDE loss: 0.0017 | Physics loss: 0.0144
+[Epoch 122] Total loss: 0.8897 | PINN loss: 0.7353 | Contrastive loss: 4.9348 | PDE loss: 0.0017 | Physics loss: 0.0141
+[Epoch 123] Total loss: 0.8919 | PINN loss: 0.7371 | Contrastive loss: 4.9430 | PDE loss: 0.0017 | Physics loss: 0.0144
+[Epoch 124] Total loss: 0.8821 | PINN loss: 0.7290 | Contrastive loss: 4.9572 | PDE loss: 0.0017 | Physics loss: 0.0148
+[Epoch 125] Total loss: 0.8811 | PINN loss: 0.7282 | Contrastive loss: 4.9704 | PDE loss: 0.0017 | Physics loss: 0.0148
+[Epoch 126] Total loss: 0.8792 | PINN loss: 0.7266 | Contrastive loss: 4.9902 | PDE loss: 0.0017 | Physics loss: 0.0141
+[Epoch 127] Total loss: 0.8738 | PINN loss: 0.7221 | Contrastive loss: 5.0025 | PDE loss: 0.0017 | Physics loss: 0.0133
+[Epoch 128] Total loss: 0.8739 | PINN loss: 0.7222 | Contrastive loss: 5.0174 | PDE loss: 0.0017 | Physics loss: 0.0136
+[Epoch 129] Total loss: 0.8666 | PINN loss: 0.7162 | Contrastive loss: 5.0286 | PDE loss: 0.0017 | Physics loss: 0.0134
+[Epoch 130] Total loss: 0.8772 | PINN loss: 0.7250 | Contrastive loss: 5.0485 | PDE loss: 0.0017 | Physics loss: 0.0147
+[Validation] Epoch 130: MSE = 0.071612
+New best model saved at epoch 130 with validation MSE: 0.071612
+[Test] MSE: 0.04414484, MAE: 0.171242, MAPE: 0.002172, RMSE: 0.210107, R²: 0.9991
+[Epoch 131] Total loss: 0.8624 | PINN loss: 0.7127 | Contrastive loss: 5.0602 | PDE loss: 0.0017 | Physics loss: 0.0138
+[Epoch 132] Total loss: 0.8678 | PINN loss: 0.7172 | Contrastive loss: 5.0800 | PDE loss: 0.0017 | Physics loss: 0.0137
+[Epoch 133] Total loss: 0.8657 | PINN loss: 0.7155 | Contrastive loss: 5.0914 | PDE loss: 0.0017 | Physics loss: 0.0141
+[Epoch 134] Total loss: 0.8639 | PINN loss: 0.7139 | Contrastive loss: 5.1049 | PDE loss: 0.0016 | Physics loss: 0.0143
+[Epoch 135] Total loss: 0.8617 | PINN loss: 0.7121 | Contrastive loss: 5.1202 | PDE loss: 0.0016 | Physics loss: 0.0137
+[Epoch 136] Total loss: 0.8654 | PINN loss: 0.7152 | Contrastive loss: 5.1366 | PDE loss: 0.0017 | Physics loss: 0.0145
+[Epoch 137] Total loss: 0.8543 | PINN loss: 0.7060 | Contrastive loss: 5.1490 | PDE loss: 0.0016 | Physics loss: 0.0136
+[Epoch 138] Total loss: 0.8600 | PINN loss: 0.7107 | Contrastive loss: 5.1607 | PDE loss: 0.0016 | Physics loss: 0.0136
+[Epoch 139] Total loss: 0.8509 | PINN loss: 0.7032 | Contrastive loss: 5.1738 | PDE loss: 0.0016 | Physics loss: 0.0130
+[Epoch 140] Total loss: 0.8562 | PINN loss: 0.7076 | Contrastive loss: 5.1835 | PDE loss: 0.0016 | Physics loss: 0.0134
+[Validation] Epoch 140: MSE = 0.069960
+New best model saved at epoch 140 with validation MSE: 0.069960
+[Test] MSE: 0.05567136, MAE: 0.188528, MAPE: 0.002418, RMSE: 0.235948, R²: 0.9989
+[Epoch 141] Total loss: 0.8543 | PINN loss: 0.7061 | Contrastive loss: 5.1922 | PDE loss: 0.0016 | Physics loss: 0.0129
+[Epoch 142] Total loss: 0.8501 | PINN loss: 0.7025 | Contrastive loss: 5.2009 | PDE loss: 0.0016 | Physics loss: 0.0133
+[Epoch 143] Total loss: 0.8445 | PINN loss: 0.6980 | Contrastive loss: 5.2161 | PDE loss: 0.0016 | Physics loss: 0.0133
+[Epoch 144] Total loss: 0.8479 | PINN loss: 0.7007 | Contrastive loss: 5.2148 | PDE loss: 0.0016 | Physics loss: 0.0136
+[Epoch 145] Total loss: 0.8428 | PINN loss: 0.6965 | Contrastive loss: 5.2246 | PDE loss: 0.0016 | Physics loss: 0.0138
+[Epoch 146] Total loss: 0.8335 | PINN loss: 0.6888 | Contrastive loss: 5.2324 | PDE loss: 0.0016 | Physics loss: 0.0135
+[Epoch 147] Total loss: 0.8343 | PINN loss: 0.6895 | Contrastive loss: 5.2351 | PDE loss: 0.0016 | Physics loss: 0.0133
+[Epoch 148] Total loss: 0.8303 | PINN loss: 0.6862 | Contrastive loss: 5.2449 | PDE loss: 0.0016 | Physics loss: 0.0127
+[Epoch 149] Total loss: 0.8367 | PINN loss: 0.6915 | Contrastive loss: 5.2468 | PDE loss: 0.0016 | Physics loss: 0.0136
+[Epoch 150] Total loss: 0.8302 | PINN loss: 0.6861 | Contrastive loss: 5.2497 | PDE loss: 0.0016 | Physics loss: 0.0140
+[Validation] Epoch 150: MSE = 0.061178
+New best model saved at epoch 150 with validation MSE: 0.061178
+[Test] MSE: 0.03376083, MAE: 0.147158, MAPE: 0.001875, RMSE: 0.183741, R²: 0.9993
+[Epoch 151] Total loss: 0.8349 | PINN loss: 0.6900 | Contrastive loss: 5.2533 | PDE loss: 0.0016 | Physics loss: 0.0129
+[Epoch 152] Total loss: 0.8270 | PINN loss: 0.6835 | Contrastive loss: 5.2562 | PDE loss: 0.0016 | Physics loss: 0.0137
+[Epoch 153] Total loss: 0.8230 | PINN loss: 0.6802 | Contrastive loss: 5.2597 | PDE loss: 0.0016 | Physics loss: 0.0130
+[Epoch 154] Total loss: 0.8217 | PINN loss: 0.6791 | Contrastive loss: 5.2635 | PDE loss: 0.0016 | Physics loss: 0.0130
+[Epoch 155] Total loss: 0.8258 | PINN loss: 0.6825 | Contrastive loss: 5.2628 | PDE loss: 0.0016 | Physics loss: 0.0130
+[Epoch 156] Total loss: 0.8202 | PINN loss: 0.6778 | Contrastive loss: 5.2640 | PDE loss: 0.0016 | Physics loss: 0.0136
+[Epoch 157] Total loss: 0.8214 | PINN loss: 0.6788 | Contrastive loss: 5.2645 | PDE loss: 0.0016 | Physics loss: 0.0138
+[Epoch 158] Total loss: 0.8194 | PINN loss: 0.6772 | Contrastive loss: 5.2688 | PDE loss: 0.0016 | Physics loss: 0.0137
+[Epoch 159] Total loss: 0.8169 | PINN loss: 0.6752 | Contrastive loss: 5.2680 | PDE loss: 0.0016 | Physics loss: 0.0135
+[Epoch 160] Total loss: 0.8122 | PINN loss: 0.6713 | Contrastive loss: 5.2697 | PDE loss: 0.0016 | Physics loss: 0.0128
+[Validation] Epoch 160: MSE = 0.062800
+[Epoch 161] Total loss: 0.8127 | PINN loss: 0.6717 | Contrastive loss: 5.2736 | PDE loss: 0.0016 | Physics loss: 0.0131
+[Epoch 162] Total loss: 0.8087 | PINN loss: 0.6684 | Contrastive loss: 5.2766 | PDE loss: 0.0016 | Physics loss: 0.0130
+[Epoch 163] Total loss: 0.8056 | PINN loss: 0.6658 | Contrastive loss: 5.2790 | PDE loss: 0.0016 | Physics loss: 0.0134
+[Epoch 164] Total loss: 0.8040 | PINN loss: 0.6645 | Contrastive loss: 5.2796 | PDE loss: 0.0016 | Physics loss: 0.0129
+[Epoch 165] Total loss: 0.8036 | PINN loss: 0.6641 | Contrastive loss: 5.2839 | PDE loss: 0.0016 | Physics loss: 0.0130
+[Epoch 166] Total loss: 0.8019 | PINN loss: 0.6627 | Contrastive loss: 5.2903 | PDE loss: 0.0016 | Physics loss: 0.0128
+[Epoch 167] Total loss: 0.8091 | PINN loss: 0.6687 | Contrastive loss: 5.2869 | PDE loss: 0.0016 | Physics loss: 0.0131
+[Epoch 168] Total loss: 0.7978 | PINN loss: 0.6593 | Contrastive loss: 5.2911 | PDE loss: 0.0016 | Physics loss: 0.0135
+[Epoch 169] Total loss: 0.8035 | PINN loss: 0.6641 | Contrastive loss: 5.2942 | PDE loss: 0.0015 | Physics loss: 0.0140
+[Epoch 170] Total loss: 0.7964 | PINN loss: 0.6582 | Contrastive loss: 5.2977 | PDE loss: 0.0015 | Physics loss: 0.0127
+[Validation] Epoch 170: MSE = 0.051434
+New best model saved at epoch 170 with validation MSE: 0.051434
+[Test] MSE: 0.03082567, MAE: 0.139107, MAPE: 0.001773, RMSE: 0.175572, R²: 0.9994
+[Epoch 171] Total loss: 0.7928 | PINN loss: 0.6552 | Contrastive loss: 5.2988 | PDE loss: 0.0015 | Physics loss: 0.0123
+[Epoch 172] Total loss: 0.8023 | PINN loss: 0.6630 | Contrastive loss: 5.3048 | PDE loss: 0.0015 | Physics loss: 0.0128
+[Epoch 173] Total loss: 0.7966 | PINN loss: 0.6583 | Contrastive loss: 5.3081 | PDE loss: 0.0016 | Physics loss: 0.0128
+[Epoch 174] Total loss: 0.7924 | PINN loss: 0.6549 | Contrastive loss: 5.3100 | PDE loss: 0.0015 | Physics loss: 0.0132
+[Epoch 175] Total loss: 0.7930 | PINN loss: 0.6554 | Contrastive loss: 5.3154 | PDE loss: 0.0015 | Physics loss: 0.0123
+[Epoch 176] Total loss: 0.7907 | PINN loss: 0.6535 | Contrastive loss: 5.3148 | PDE loss: 0.0016 | Physics loss: 0.0125
+[Epoch 177] Total loss: 0.7952 | PINN loss: 0.6572 | Contrastive loss: 5.3195 | PDE loss: 0.0015 | Physics loss: 0.0132
+[Epoch 178] Total loss: 0.7897 | PINN loss: 0.6527 | Contrastive loss: 5.3228 | PDE loss: 0.0015 | Physics loss: 0.0129
+[Epoch 179] Total loss: 0.7929 | PINN loss: 0.6553 | Contrastive loss: 5.3262 | PDE loss: 0.0015 | Physics loss: 0.0122
+[Epoch 180] Total loss: 0.7922 | PINN loss: 0.6547 | Contrastive loss: 5.3270 | PDE loss: 0.0015 | Physics loss: 0.0132
+[Validation] Epoch 180: MSE = 0.051992
+[Epoch 181] Total loss: 0.7992 | PINN loss: 0.6605 | Contrastive loss: 5.3299 | PDE loss: 0.0015 | Physics loss: 0.0129
+[Epoch 182] Total loss: 0.7877 | PINN loss: 0.6510 | Contrastive loss: 5.3327 | PDE loss: 0.0015 | Physics loss: 0.0125
+[Epoch 183] Total loss: 0.7873 | PINN loss: 0.6507 | Contrastive loss: 5.3335 | PDE loss: 0.0015 | Physics loss: 0.0128
+[Epoch 184] Total loss: 0.7920 | PINN loss: 0.6545 | Contrastive loss: 5.3383 | PDE loss: 0.0015 | Physics loss: 0.0130
+[Epoch 185] Total loss: 0.7812 | PINN loss: 0.6457 | Contrastive loss: 5.3397 | PDE loss: 0.0015 | Physics loss: 0.0118
+[Epoch 186] Total loss: 0.7884 | PINN loss: 0.6516 | Contrastive loss: 5.3414 | PDE loss: 0.0015 | Physics loss: 0.0124
+[Epoch 187] Total loss: 0.7852 | PINN loss: 0.6490 | Contrastive loss: 5.3435 | PDE loss: 0.0015 | Physics loss: 0.0128
+[Epoch 188] Total loss: 0.7896 | PINN loss: 0.6526 | Contrastive loss: 5.3464 | PDE loss: 0.0015 | Physics loss: 0.0131
+[Epoch 189] Total loss: 0.7820 | PINN loss: 0.6463 | Contrastive loss: 5.3463 | PDE loss: 0.0015 | Physics loss: 0.0121
+[Epoch 190] Total loss: 0.7827 | PINN loss: 0.6469 | Contrastive loss: 5.3478 | PDE loss: 0.0015 | Physics loss: 0.0123
+[Validation] Epoch 190: MSE = 0.050025
+New best model saved at epoch 190 with validation MSE: 0.050025
+[Test] MSE: 0.03055769, MAE: 0.141989, MAPE: 0.001785, RMSE: 0.174808, R²: 0.9994
+[Epoch 191] Total loss: 0.7898 | PINN loss: 0.6528 | Contrastive loss: 5.3488 | PDE loss: 0.0015 | Physics loss: 0.0139
+[Epoch 192] Total loss: 0.7833 | PINN loss: 0.6473 | Contrastive loss: 5.3529 | PDE loss: 0.0015 | Physics loss: 0.0125
+[Epoch 193] Total loss: 0.7821 | PINN loss: 0.6463 | Contrastive loss: 5.3510 | PDE loss: 0.0015 | Physics loss: 0.0131
+[Epoch 194] Total loss: 0.7823 | PINN loss: 0.6465 | Contrastive loss: 5.3519 | PDE loss: 0.0015 | Physics loss: 0.0122
+[Epoch 195] Total loss: 0.7814 | PINN loss: 0.6457 | Contrastive loss: 5.3528 | PDE loss: 0.0015 | Physics loss: 0.0128
+[Epoch 196] Total loss: 0.7832 | PINN loss: 0.6473 | Contrastive loss: 5.3531 | PDE loss: 0.0015 | Physics loss: 0.0125
+[Epoch 197] Total loss: 0.7823 | PINN loss: 0.6465 | Contrastive loss: 5.3535 | PDE loss: 0.0015 | Physics loss: 0.0129
+[Epoch 198] Total loss: 0.7839 | PINN loss: 0.6479 | Contrastive loss: 5.3548 | PDE loss: 0.0015 | Physics loss: 0.0124
+[Epoch 199] Total loss: 0.7805 | PINN loss: 0.6450 | Contrastive loss: 5.3552 | PDE loss: 0.0015 | Physics loss: 0.0129
+[Epoch 200] Total loss: 0.7815 | PINN loss: 0.6459 | Contrastive loss: 5.3561 | PDE loss: 0.0015 | Physics loss: 0.0127
+[Validation] Epoch 200: MSE = 0.053956
+/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/numpy/lib/function_base.py:2559: RuntimeWarning: invalid value encountered in true_divide
+  c /= stddev[:, None]
+/home/choi/anaconda3/envs/picl/lib/python3.7/site-packages/numpy/lib/function_base.py:2560: RuntimeWarning: invalid value encountered in true_divide
+  c /= stddev[None, :]
+Could not load best model for final visualization: name 'stats' is not defined
+Training completed. Best model at epoch 190 with validation MSE: 0.050025

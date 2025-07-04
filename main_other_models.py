@@ -308,16 +308,16 @@ def get_args():
 
     # scheduler related
     parser.add_argument('--epochs', type=int, default=200, help='epoch')
-    parser.add_argument('--early_stop', type=int, default=20, help='early stop')
-    parser.add_argument('--warmup_epochs', type=int, default=30, help='warmup epoch')
-    parser.add_argument('--warmup_lr', type=float, default=2e-3, help='warmup lr')
-    parser.add_argument('--lr', type=float, default=1e-2, help='learning rate')
-    parser.add_argument('--final_lr', type=float, default=2e-4, help='final lr')
+    parser.add_argument('--early_stop', type=int, default=30, help='early stop')
+    parser.add_argument('--warmup_epochs', type=int, default=50, help='warmup epoch')
+    parser.add_argument('--warmup_lr', type=float, default=1e-4, help='warmup lr')
+    parser.add_argument('--lr', type=float, default=0.0005, help='learning rate')
+    parser.add_argument('--final_lr', type=float, default=1e-5, help='final lr')
 
     parser.add_argument('--save_folder', type=str, default='./baseline_results')
     parser.add_argument('--log_dir', type=str, default='logging.txt')
     
-    parser.add_argument('--wandb_project', type=str, default='battery-health-comparison')
+    parser.add_argument('--wandb_project', type=str, default='battery-picle-small-dataset')
     parser.add_argument('--wandb_entity', type=str, default=None)
     parser.add_argument('--wandb_run_name', type=str, default=None)
     

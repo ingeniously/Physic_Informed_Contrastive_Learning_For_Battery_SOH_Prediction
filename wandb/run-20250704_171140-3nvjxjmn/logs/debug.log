@@ -1,0 +1,33 @@
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_setup.py:_flush():79] Current SDK version is 0.18.7
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_setup.py:_flush():79] Configure stats pid to 3878448
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_setup.py:_flush():79] Loading settings from /home/choi/.config/wandb/settings
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_setup.py:_flush():79] Loading settings from /home/choi/PICL/wandb/settings
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_setup.py:_flush():79] Loading settings from environment variables: {}
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_setup.py:_flush():79] Applying setup settings: {'mode': None, '_disable_service': None}
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_setup.py:_flush():79] Inferring run settings from compute environment: {'program_relpath': 'main_other_models.py', 'program_abspath': '/home/choi/PICL/main_other_models.py', 'program': 'main_other_models.py'}
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_setup.py:_flush():79] Applying login settings: {}
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_init.py:_log_setup():533] Logging user logs to /home/choi/PICL/wandb/run-20250704_171140-3nvjxjmn/logs/debug.log
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_init.py:_log_setup():534] Logging internal logs to /home/choi/PICL/wandb/run-20250704_171140-3nvjxjmn/logs/debug-internal.log
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_init.py:init():619] calling init triggers
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_init.py:init():627] wandb.init called with sweep_config: {}
+config: {'model': 'MLP', 'csv_file': '/home/choi/PICL/data_processed/preprocessed_battery_health_dataset_all_points.csv', 'batch_size': 128, 'normalization_method': 'z-score', 'epochs': 200, 'early_stop': 30, 'warmup_epochs': 50, 'warmup_lr': 0.0001, 'lr': 0.0005, 'final_lr': 1e-05, 'save_folder': '/home/choi/PICL/result_small_sample_05_06_07_18', 'log_dir': 'logging.txt', 'wandb_project': 'battery-picle-small-dataset', 'wandb_entity': None, 'wandb_run_name': None}
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_init.py:init():669] starting backend
+2025-07-04 17:11:40,309 INFO    MainThread:3878448 [wandb_init.py:init():673] sending inform_init request
+2025-07-04 17:11:40,310 INFO    MainThread:3878448 [backend.py:_multiprocessing_setup():106] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2025-07-04 17:11:40,310 INFO    MainThread:3878448 [wandb_init.py:init():686] backend started and connected
+2025-07-04 17:11:40,311 INFO    MainThread:3878448 [wandb_init.py:init():781] updated telemetry
+2025-07-04 17:11:40,318 INFO    MainThread:3878448 [wandb_init.py:init():814] communicating run to backend with 90.0 second timeout
+2025-07-04 17:11:41,092 INFO    MainThread:3878448 [wandb_init.py:init():867] starting run threads in backend
+2025-07-04 17:11:41,148 INFO    MainThread:3878448 [wandb_run.py:_console_start():2456] atexit reg
+2025-07-04 17:11:41,148 INFO    MainThread:3878448 [wandb_run.py:_redirect():2305] redirect: wrap_raw
+2025-07-04 17:11:41,148 INFO    MainThread:3878448 [wandb_run.py:_redirect():2370] Wrapping output streams.
+2025-07-04 17:11:41,149 INFO    MainThread:3878448 [wandb_run.py:_redirect():2395] Redirects installed.
+2025-07-04 17:11:41,150 INFO    MainThread:3878448 [wandb_init.py:init():911] run started, returning control to user process
+2025-07-04 17:11:41,313 INFO    MainThread:3878448 [wandb_run.py:_config_callback():1387] config_cb None None {'MLP_params': 9793, 'device': 'cpu'}
+2025-07-04 17:14:29,363 INFO    MainThread:3878448 [wandb_run.py:_finish():2155] finishing run bassolecedric-dongguk-university/battery-picle-small-dataset/3nvjxjmn
+2025-07-04 17:14:29,363 INFO    MainThread:3878448 [wandb_run.py:_atexit_cleanup():2420] got exitcode: 0
+2025-07-04 17:14:29,363 INFO    MainThread:3878448 [wandb_run.py:_restore():2402] restore
+2025-07-04 17:14:29,363 INFO    MainThread:3878448 [wandb_run.py:_restore():2408] restore done
+2025-07-04 17:14:33,818 INFO    MainThread:3878448 [wandb_run.py:_footer_history_summary_info():3960] rendering history
+2025-07-04 17:14:33,819 INFO    MainThread:3878448 [wandb_run.py:_footer_history_summary_info():3992] rendering summary
+2025-07-04 17:14:33,823 INFO    MainThread:3878448 [wandb_run.py:_footer_sync_info():3921] logging synced files
