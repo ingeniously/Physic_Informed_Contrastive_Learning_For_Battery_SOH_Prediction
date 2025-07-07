@@ -27,7 +27,8 @@ metadata['battery_id'] = metadata['battery_id'].astype(str)
 # Exclude problematic batteries
 # Mentioned in the extra_infos/README_49_50_51_52.txt
 # ("The experiments were carried out until the experiment control software crashed")
-excluded_batteries = ['B0049', 'B0050', 'B0051', 'B0052',
+excluded_batteries = [ 'B0006', 'B0007', 'B0018',
+                     'B0049', 'B0050', 'B0051', 'B0052',
                       'B0025', 'B0026', 'B0027', 'B0028',
                      'B0029', 'B0030', 'B0031', 'B0032',
                       'B0033', 'B0034', 'B0036',
@@ -104,8 +105,8 @@ for _, row in tqdm(discharge_metadata.iterrows(), total=len(discharge_metadata))
   
         # Select columns for output (including all engineered and raw features)
         selected_columns = [
-          #   'cycle_number',       # Cycle index
-          #   'battery_id',         # Battery ID  
+           #  'cycle_number',       # Cycle index
+           #  'battery_id',         # Battery ID  
          #    'Time',               # Absolute time
          #    'Time_rel',           # Relative time (cycle-based)        
             'Voltage_measured',

@@ -30,85 +30,159 @@ class MLP(nn.Module):
 
         # If this is the dynamical_F network (input_dim=20)
         if input_dim == 20:
-            # Use simple sequential network for F
-            layers = []
+            # Enhanced network for F with residual connections
+            self.net = nn.ModuleList()
             for i in range(layers_num):
                 if i == 0:
-                    layers.append(nn.Linear(input_dim, hidden_dim))
-                    layers.append(Sin())
+                    self.net.append(nn.Sequential(
+                        nn.Linear(input_dim, hidden_dim),
+                        nn.LayerNorm(hidden_dim),
+                        nn.SiLU()
+                    ))
                 elif i == layers_num - 1:
-                    layers.append(nn.Linear(hidden_dim, 1))
+                    self.net.append(nn.Linear(hidden_dim, 1))
                 else:
-                    layers.append(nn.Linear(hidden_dim, hidden_dim))
-                    layers.append(Sin())
-                    layers.append(nn.Dropout(p=droupout))
-            self.net = nn.Sequential(*layers)
+                    self.net.append(nn.Sequential(
+                        nn.Linear(hidden_dim, hidden_dim),
+                        nn.LayerNorm(hidden_dim),
+                        nn.SiLU(),
+                        nn.Dropout(p=droupout)
+                    ))
         else:
-            # For encoder network (input_dim=9)
+            # Enhanced separate networks for time and features
             self.time_net = nn.Sequential(
                 nn.Linear(1, output_dim),
-                Sin(),
-                nn.Linear(output_dim, output_dim)
+                nn.LayerNorm(output_dim),
+                nn.SiLU(),
+                nn.Linear(output_dim, output_dim),
+                nn.LayerNorm(output_dim)
             )
 
-            self.feature_net = nn.Sequential(
-                nn.Linear(input_dim - 1, output_dim),  # -1 for time feature
-                Sin(),
-                nn.Dropout(p=droupout),
-                nn.Linear(output_dim, output_dim),
-                Sin(),
-                nn.Linear(output_dim, output_dim)
-            )
+            # Deeper feature network with residual connections
+            self.feature_embed = nn.Linear(input_dim - 1, hidden_dim)
+            self.feature_layers = nn.ModuleList()
+            for _ in range(2):  # Two residual blocks
+                self.feature_layers.append(nn.Sequential(
+                    nn.Linear(hidden_dim, hidden_dim),
+                    nn.LayerNorm(hidden_dim),
+                    nn.SiLU(),
+                    nn.Dropout(p=droupout),
+                    nn.Linear(hidden_dim, hidden_dim)
+                ))
+            self.feature_out = nn.Linear(hidden_dim, output_dim)
         
         self._init()
 
     def _init(self):
-            for layer in self.modules():
-                if isinstance(layer, nn.Linear):
-                    nn.init.xavier_normal_(layer.weight)
-                    if layer.bias is not None:
-                        nn.init.constant_(layer.bias, 0)
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
 
     def forward(self, x):
         if self.input_dim == 20:
-            return self.net(x)
+            # Apply network with residual connections
+            h = x
+            for i, layer in enumerate(self.net):
+                if i == len(self.net) - 1:  # Last layer (no residual)
+                    h = layer(h)
+                else:
+                    h = h + layer(h) if h.shape == layer(h).shape else layer(h)
+            return h
+        
+        # Process time and features separately with enhanced networks
         time = x[:, -1].unsqueeze(-1)
         features = x[:, :-1]
+        
         time_embedding = self.time_net(time)
-        feature_embedding = self.feature_net(features)
+        
+        # Process features with residual connections
+        h = self.feature_embed(features)
+        for layer in self.feature_layers:
+            h = h + layer(h)  # Residual connection
+        feature_embedding = self.feature_out(h)
+        
         return torch.cat([feature_embedding, time_embedding], dim=1)
 
 
 class Predictor(nn.Module):
-    def __init__(self, input_dim=65):  # Changed back to 65 to include time feature
+    def __init__(self, input_dim=65):
         super(Predictor, self).__init__()
-        self.net = nn.Sequential(
-            nn.Dropout(p=0.2),
-            nn.Linear(input_dim, 64),
-            Sin(),
-            nn.Linear(64, 32),
-            Sin(),
+        hidden_dim = 64
+        
+        # Enhanced predictor with residual connections
+        self.input_norm = nn.LayerNorm(input_dim)
+        self.input_proj = nn.Linear(input_dim, hidden_dim)
+        
+        # Residual blocks
+        self.res_blocks = nn.ModuleList([
+            nn.Sequential(
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.LayerNorm(hidden_dim),
+                nn.SiLU(),
+                nn.Dropout(0.1),
+                nn.Linear(hidden_dim, hidden_dim)
+            ),
+            nn.Sequential(
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.LayerNorm(hidden_dim),
+                nn.SiLU(),
+                nn.Dropout(0.1),
+                nn.Linear(hidden_dim, hidden_dim)
+            )
+        ])
+        
+        # Output projection with multiple branches
+        self.output = nn.Sequential(
+            nn.LayerNorm(hidden_dim),
+            nn.Linear(hidden_dim, 32),
+            nn.SiLU(),
             nn.Linear(32, 1)
         )
+        
+        # Initialize weights
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
+    
     def forward(self, x):
-        return self.net(x)
+        # Initial projection
+        h = self.input_norm(x)
+        h = self.input_proj(h)
+        
+        # Apply residual blocks
+        for block in self.res_blocks:
+            h = h + block(h)  # Residual connection
+        
+        # Output projection
+        return self.output(h)
 
 class Solution_u(nn.Module):
     def __init__(self):
         super(Solution_u, self).__init__()
-        # Encoder output_dim should match predictor input after concatenation
+        # Keep the encoder the same
         self.encoder = MLP(input_dim=9, output_dim=32, layers_num=4, hidden_dim=64, droupout=0.2)
         
-        # Modified predictor to match encoder output size
+        # Replace the predictor with an improved version
+        hidden_dim = 64
         self.predictor = nn.Sequential(
-            nn.Linear(64, 32),  # 64 = encoder output (32) + time embedding (32)
-            Sin(),
-            nn.Dropout(p=0.2),
-            nn.Linear(32, 16),
-            Sin(),
-            nn.Linear(16, 1)
+            nn.LayerNorm(64),  # 64 = encoder output (32) + time embedding (32)
+            nn.Linear(64, hidden_dim),
+            nn.SiLU(),
+            nn.Dropout(0.1),
+            nn.Linear(hidden_dim, hidden_dim//2),
+            nn.LayerNorm(hidden_dim//2),
+            nn.SiLU(),
+            nn.Linear(hidden_dim//2, 1)
         )
         self._init_()
+
+
+
+
 
     def forward(self, x, time=None):
         if time is None:
@@ -765,7 +839,7 @@ if __name__ == "__main__":
     def get_args():
         parser = argparse.ArgumentParser('Hyper Parameters')
         parser.add_argument('--csv_file', type=str, required=True, help='Path to CSV file')
-        parser.add_argument('--batch_size', type=int, default=128, help='batch size')  # Smaller batch size
+        parser.add_argument('--batch_size', type=int, default=512, help='batch size')  # Smaller batch size
         parser.add_argument('--normalization_method', type=str, default='z-score', help='min-max,z-score')
         
         # Updated scheduler parameters
