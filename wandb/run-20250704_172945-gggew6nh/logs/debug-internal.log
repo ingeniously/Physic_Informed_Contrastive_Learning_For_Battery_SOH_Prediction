@@ -1,8 +1,0 @@
-{"time":"2025-07-04T17:29:45.27146325+09:00","level":"INFO","msg":"using version","core version":"0.18.7"}
-{"time":"2025-07-04T17:29:45.27152835+09:00","level":"INFO","msg":"created symlink","path":"/home/choi/PICL/wandb/run-20250704_172945-gggew6nh/logs/debug-core.log"}
-{"time":"2025-07-04T17:29:45.46682425+09:00","level":"INFO","msg":"created new stream","id":"gggew6nh"}
-{"time":"2025-07-04T17:29:45.46685265+09:00","level":"INFO","msg":"stream: started","id":"gggew6nh"}
-{"time":"2025-07-04T17:29:45.46701605+09:00","level":"INFO","msg":"handler: started","stream_id":"gggew6nh"}
-{"time":"2025-07-04T17:29:45.46734095+09:00","level":"INFO","msg":"sender: started","stream_id":"gggew6nh"}
-{"time":"2025-07-04T17:29:45.46742705+09:00","level":"INFO","msg":"writer: Do: started","stream_id":"gggew6nh"}
-{"time":"2025-07-04T17:29:45.95787655+09:00","level":"INFO","msg":"Starting system monitor"}
