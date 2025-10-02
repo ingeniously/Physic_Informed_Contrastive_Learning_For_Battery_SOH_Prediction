@@ -1,0 +1,18 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyd
+*.so
+
+# Environments
+venv/
+env/
+.env
+
+# Testing
+.pytest_cache/
+
+# Editor/OS temporary files
+.DS_Store
+*.swp
+wandb/
