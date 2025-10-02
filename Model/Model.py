@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
+import pandas as pd
 from torch.autograd import grad
 from dataloader import dataloader
 from utils.util import AverageMeter, get_logger, eval_metrix
@@ -456,15 +457,15 @@ class PINN(nn.Module):
             plt.gca().text(bar.get_x() + bar.get_width()/2., height,
                          f'{height:.3f}', ha='center', va='bottom')
                          
-        plt.tight_layout()
-        save_path = os.path.join(save_folder, 'feature_importance.png')
-        plt.savefig(save_path, dpi=300)
+       # plt.tight_layout()
+       # save_path = os.path.join(save_folder, 'feature_importance.png')
+       # plt.savefig(save_path, dpi=300)
         
         # Log to wandb if initialized
-        if hasattr(wandb, 'run') and wandb.run is not None:
-            wandb.log({"analysis/feature_importance": wandb.Image(save_path)})
+        #if hasattr(wandb, 'run') and wandb.run is not None:
+        #    wandb.log({"analysis/feature_importance": wandb.Image(save_path)})
             
-        plt.close()
+       # plt.close()
 
     def visualize_training_history(self, save_folder=None):
         """
@@ -555,21 +556,7 @@ class PINN(nn.Module):
                     "test/mae": mae,
                     "test/r2": r2
                 })
-                
-                # Also attempt to visualize feature importance if we have data
-                if len(true_label) > 0:
-                    x_data = []
-                    for x1, _, _, _ in testloader:
-                        x_data.append(x1.cpu().numpy())
-                    if x_data:
-                        x_data = np.concatenate(x_data, axis=0)
-                        if x_data.shape[0] > 100:  # Use a sample for efficiency
-                            indices = np.random.choice(x_data.shape[0], 100, replace=False)
-                            x_sample = x_data[indices]
-                            self.visualize_feature_importance(
-                                x_sample, 
-                                save_folder=self.args.save_folder if hasattr(self.args, "save_folder") else None
-                            )
+
         except Exception as e:
             print(f"Error creating test visualizations: {e}")
                 

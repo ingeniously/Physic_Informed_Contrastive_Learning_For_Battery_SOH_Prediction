@@ -316,16 +316,20 @@ if __name__ == "__main__":
 
     # ---- Feature List ----
     feature_list = [
-        "Voltage_measured",      # Measured cell voltage [V]
-        "Current_measured",      # Measured current [A]
-        "Temperature_measured",  # Measured temperature [°C]
-        "Current_load",          # Applied load current [A]
-        "Voltage_load",          # Applied load voltage [V]
-        "SoC",                   # State of Charge [%]
-        "Resistance",            # Instantaneous resistance [Ohm]
-        "Capacity",              # Cycle capacity [Ah]
-        "Time_norm",             # Normalized time (relative, [0-1])
-        "SoH"                    # State of Health [%]
+        #     'cycle_number',       # Cycle index
+           #  'battery_id',         # Battery ID  
+         #    'Time',               # Absolute time
+         #    'Time_rel',           # Relative time (cycle-based)        
+            'Voltage_measured',
+            'Current_measured',
+            'Temperature_measured',
+            'Current_load',
+            'Voltage_load',
+            'SoC',                 # State of Charge (%)
+            'Resistance',         # Instantaneous resistance (Ohm)
+            'Capacity',            # Cycle capacity (Ah)
+            'Time_norm',           # Normalized relative time
+            'SoH',                # State of Health (%)
     ]
     print("\nFeatures in the final (physically augmented) dataset:")
     for feat in feature_list:

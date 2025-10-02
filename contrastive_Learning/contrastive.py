@@ -4,27 +4,79 @@ import torch.nn.functional as F
 import numpy as np
 from copy import deepcopy
 
-class ProjectionHead(nn.Module):
+class TransformerProjection(nn.Module):
     """
-    Improved projection head with more expressive power
+    BERT-style transformer encoder projection head for contrastive learning
     """
-    def __init__(self, input_dim, hidden_dim=256, output_dim=128):
+    def __init__(self, input_dim=64, hidden_dim=256, output_dim=128, 
+                 num_heads=4, num_layers=2, dropout=0.1):
         super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
-            nn.BatchNorm1d(hidden_dim),
-            nn.GELU(),  # Better activation function
-            nn.Dropout(0.1),  # Add dropout for regularization
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.BatchNorm1d(hidden_dim),
-            nn.GELU(),
-            nn.Linear(hidden_dim, output_dim),
-            nn.BatchNorm1d(output_dim)
+        
+        # Initial input projection to transformer dimension (Input Embedding)
+        self.input_proj = nn.Linear(input_dim, hidden_dim)
+        self.embedding_norm = nn.LayerNorm(hidden_dim)
+        
+        # Position embeddings
+        self.pos_embedding = nn.Parameter(torch.randn(1, 1, hidden_dim) * 0.02)
+        
+        # Transformer encoder layers (exact BERT structure)
+        # For PyTorch 1.7.1, use the compatible parameters
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=hidden_dim,
+            nhead=num_heads,
+            dim_feedforward=hidden_dim*4,  # Standard BERT uses 4x hidden size
+            dropout=dropout,
+            activation="gelu"  # Use string instead of function for older PyTorch
         )
-    
+        self.transformer = nn.TransformerEncoder(
+            encoder_layer=encoder_layer,
+            num_layers=num_layers
+        )
+        
+        # Output projection (BERT pooler equivalent)
+        self.pooler = nn.Linear(hidden_dim, hidden_dim)
+        self.pooler_activation = nn.Tanh()  # BERT uses tanh in its pooler
+        
+        # Final projection to output dimension
+        self.output_proj = nn.Linear(hidden_dim, output_dim)
+        self.output_norm = nn.LayerNorm(output_dim)
+        
     def forward(self, x):
-        return F.normalize(self.net(x), dim=1) # Return unnormalized projections
-
+        batch_size = x.shape[0]
+        
+        # Reshape input into batch_size x 1 x input_dim to add sequence dimension
+        x = x.unsqueeze(1)  # shape: [batch_size, 1, input_dim]
+        
+        # Initial embedding + normalization (input embedding)
+        x = self.input_proj(x)
+        x = self.embedding_norm(x)
+        
+        # Add positional embeddings
+        x = x + self.pos_embedding
+        
+        # For PyTorch 1.7.1, TransformerEncoder expects [seq_len, batch_size, feat_dim]
+        # So we need to transpose from [batch_size, seq_len, feat_dim]
+        x = x.transpose(0, 1)  # shape: [1, batch_size, hidden_dim]
+        
+        # Pass through transformer blocks
+        x = self.transformer(x)  # shape: [1, batch_size, hidden_dim]
+        
+        # Transpose back to [batch_size, seq_len, feat_dim]
+        x = x.transpose(0, 1)  # shape: [batch_size, 1, hidden_dim]
+        
+        # Take the "CLS" token (in our case, the only token)
+        x = x.squeeze(1)  # shape: [batch_size, hidden_dim]
+        
+        # BERT pooler: dense layer with tanh activation
+        x = self.pooler(x)
+        x = self.pooler_activation(x)
+        
+        # Final projection to output dimension
+        x = self.output_proj(x)
+        x = self.output_norm(x)
+        
+        # L2 normalization for contrastive learning
+        return F.normalize(x, dim=1)
 class MomentumEncoder(nn.Module):
     """
     Momentum encoder for more stable contrastive learning (MoCo style).
@@ -74,7 +126,7 @@ class ContrastivePINNWrapper(nn.Module):
     """
     Enhanced wrapper for multi-task learning with PINN and contrastive loss
     """
-    def __init__(self, pinn, temperature=0.07, contrastive_weight=0.5, pinn_weight=1.0,
+    def __init__(self, pinn, temperature=0.07, contrastive_weight=1.0, pinn_weight=1.0,
                  projection_dim=128, momentum=0.999, queue_size=4096):
         super().__init__()
         self.pinn = pinn
@@ -83,13 +135,15 @@ class ContrastivePINNWrapper(nn.Module):
         # Get encoder output dimension (from the actual model)
         encoder_dim = 64  # Should match the output dim of your encoder
         
-        # Add projection head for contrastive learning
-        self.projection_head = ProjectionHead(
+        self.projection_head = TransformerProjection(
             input_dim=encoder_dim, 
-            hidden_dim=projection_dim*2,  # Larger hidden dimension
-            output_dim=projection_dim
+            hidden_dim=projection_dim*2,      # 256 if projection_dim=128
+            output_dim=projection_dim,        # 128 by default
+            num_heads=4,                      # 4 attention heads
+            num_layers=2,                     # 2 transformer layers
+            dropout=0.1,                      # Small dropout for regularization
         )
-        
+
         # Setup momentum encoder
         self.momentum_encoder = MomentumEncoder(
             self.encoder, 

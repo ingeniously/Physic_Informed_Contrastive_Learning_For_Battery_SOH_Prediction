@@ -99,8 +99,8 @@ def visualize_training_progress(train_loss, pinn_loss, contrastive_loss, pde_los
     plt.close()
     
     # Upload to wandb
-    wandb.log({"Detailed Training Progress": wandb.Image(
-        os.path.join(save_folder, f"detailed_training_progress_epoch_{epoch}.png"))})
+    #wandb.log({"Detailed Training Progress": wandb.Image(
+       # os.path.join(save_folder, f"detailed_training_progress_epoch_{epoch}.png"))})
 
 def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -157,12 +157,12 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
         wrapper.temperature = current_temperature
         
         # Log the dynamic hyperparameters
-        wandb.log({
-            "hyperparams/momentum": wrapper.momentum_encoder.momentum,
-            "hyperparams/temperature": current_temperature,
-            "hyperparams/contrastive_weight": wrapper.contrastive_weight,
-            "epoch": epoch
-        })
+      #  wandb.log({
+       #     "hyperparams/momentum": wrapper.momentum_encoder.momentum,
+        #    "hyperparams/temperature": current_temperature,
+        #    "hyperparams/contrastive_weight": wrapper.contrastive_weight,
+       #     "epoch": epoch
+       # })
                 
         
         # Reset iterators for each epoch
@@ -353,7 +353,11 @@ def train_contrastive_pinn(wrapper, orig_loader, aug_loader, args):
         corr_matrix = np.corrcoef(x_batch.T)
         
         plt.figure(figsize=(12, 10))
-        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm",
+        custom_colors = ["#afe5f0", "#c7e9c0", "#7fcdbb", "#41b6c4", "#2c7fb8", "#253494"]
+        
+        # Create a custom colormap
+        custom_cmap = LinearSegmentedColormap.from_list("custom_cmap", custom_colors, N=256)
+        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap=custom_cmap,
                 xticklabels=feature_names, yticklabels=feature_names)
         plt.title("Feature Correlation Matrix", fontsize=16, fontweight='bold')
         plt.tight_layout()
@@ -715,7 +719,8 @@ def create_prediction_scatter(true_label, pred_label, save_path):
     
     # Add colorbar
     cbar = plt.colorbar(sc)
-    cbar.set_label('Absolute Error', fontsize=10)
+    cbar.set_label('Absolute Error', fontsize=18, fontweight='bold')
+    cbar.ax.tick_params(labelsize=15)
     
     # Add perfect prediction line
     min_val = min(true_label.min(), pred_label.min())
@@ -723,18 +728,23 @@ def create_prediction_scatter(true_label, pred_label, save_path):
     plt.plot([min_val, max_val], [min_val, max_val], 'r--', linewidth=2)
     
     # Add metrics text
-    plt.annotate(f'MSE = {mse:.4f}\nRMSE = {rmse:.4f}\nMAE = {mae:.4f}\nR² = {r2:.4f}',
-                xy=(0.05, 0.95), xycoords='axes fraction',
-                bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.8))
+    plt.annotate(
+        f'MSE = {mse:.4f}\nRMSE = {rmse:.4f}\nMAE = {mae:.4f}',
+        xy=(0.05, 0.95), xycoords='axes fraction',
+        bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.8),
+        fontsize=18, fontweight='bold', verticalalignment='top'
+    )
     
-    plt.xlabel('True SoH', fontsize=12)
-    plt.ylabel('Predicted SoH', fontsize=12)
-    plt.title('Battery SoH: True vs Predicted Values', fontsize=14)
+    plt.xlabel('True SoH', fontsize=18, fontweight='bold', labelpad=8)
+    plt.ylabel('Predicted SoH', fontsize=18, fontweight='bold', labelpad=8)
+    plt.title('Battery SoH: True vs Predicted Values', fontsize=18, fontweight='bold', pad=12)
     plt.grid(True, linestyle='--', alpha=0.7)
+    plt.tick_params(axis='x', which='major', labelsize=15)
+    plt.tick_params(axis='y', which='major', labelsize=15)
     plt.tight_layout()
     plt.savefig(save_path, dpi=300)
     plt.close()
-     #print(f"Enhanced prediction scatter plot saved to {save_path}")
+    # print(f"Enhanced prediction scatter plot saved to {save_path}")
 
 def get_args():
     parser = argparse.ArgumentParser('Hyper Parameters')
@@ -762,7 +772,7 @@ def get_args():
     parser.add_argument('--projection_dim', type=int, default=128, help='projection dimension for contrastive learning')
     parser.add_argument('--queue_size', type=int, default=4096, help='queue size for momentum contrast')
     parser.add_argument('--seed', type=int, default=42, help='random seed')
-    parser.add_argument('--wandb_project', type=str, default='battery-picle-unit-dataset', help='wandb project name')
+    parser.add_argument('--wandb_project', type=str, default='BASEPIC', help='wandb project name')
     parser.add_argument('--wandb_entity', type=str, default=None, help='wandb entity (username or team name)')
     parser.add_argument('--wandb_run_name', type=str, default=None, help='wandb run name')
     return parser.parse_args()
@@ -784,7 +794,7 @@ def main():
     set_seed(args.seed)
     
     # Initialize wandb
-    run_name = args.wandb_run_name if args.wandb_run_name else f"PICLE_B0005_dataset-{pd.Timestamp.now().strftime('%Y%m%d-%H%M')}"
+    run_name = args.wandb_run_name if args.wandb_run_name else f"B0005_1_Augmentation_textsize_up-{pd.Timestamp.now().strftime('%Y%m%d-%H%M')}"
     wandb.init(
         project=args.wandb_project,
         entity=args.wandb_entity,
