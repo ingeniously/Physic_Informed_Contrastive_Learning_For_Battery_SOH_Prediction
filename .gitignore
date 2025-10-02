@@ -16,3 +16,7 @@ env/
 .DS_Store
 *.swp
 wandb/
+data_augmentation/
+data_processed/
+plots/
+*.log
