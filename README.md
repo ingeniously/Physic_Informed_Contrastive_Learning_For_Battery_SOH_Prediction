@@ -84,7 +84,7 @@ python evaluate.py --model_weights checkpoints/best_model.pth --test_data ./data
 | **B0007** | **0.0781** | **0.1026** |
 | **B0018** | **0.0764** | **0.0994** |
 
-![Degradation vs Cycles](assets/degradation_plot.png)
+![Degradation vs Cycles](assets/Figure_5.png)
 *Figure 2: Ground truth vs. predicted SoH degradation across charge cycles, highlighting model robustness even with generated augmentations.*
 
 ## 📑 Citation
