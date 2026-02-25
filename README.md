@@ -26,7 +26,7 @@ Our architecture bridges this gap by utilizing a unified optimization strategy:
 
 *(Note: We recommend placing your architecture diagrams in an `assets/` folder)*
 
-![Full Architecture](assets/full_architecture.png)
+![Full Architecture](assets/Figure_1.png)
 *Figure 1: Unified architecture combining PINNE with Momentum Contrastive Learning.*
 
 The model utilizes a Shared Feature Encoder that processes time-series data (Voltage, Current, Temperature, etc.) and explicit time-dependent sinusoidal terms. The predictions are regularized by a Physics Network that calculates residual degradation governed by real-world electrochemical dynamics.
