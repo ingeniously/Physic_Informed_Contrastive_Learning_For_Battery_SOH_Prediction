@@ -1,7 +1,6 @@
 # Physics-Informed Contrastive Learning for Battery State of Health Prediction
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Paper](https://img.shields.io/badge/Paper-Complex_%26_Intelligent_Systems-green.svg)](https://doi.org/10.1007/s40747-025-02194-z)
 
 Official implementation of the paper **"Physics-informed neural network and momentum contrastive learning for battery state of health estimation"** (Complex & Intelligent Systems, 2026). 
@@ -14,7 +13,7 @@ Estimating battery SoH is critical for ensuring the safe and efficient operation
 
 Our architecture bridges this gap by utilizing a unified optimization strategy:
 1. **Physics-Informed Neural Network-based Estimation (PINNE):** Enforces physical constraints (e.g., monotonic degradation, SEI growth, calendar aging) on the predictions.
-2. **Momentum Contrastive Learning:** Extracts robust feature representations from labeled and unlabeled time-series data.
+2. **Momentum Contrastive Learning(MOCO):** Extracts robust feature representations from labeled and unlabeled time-series data.
 3. **Physics-Guided Data Augmentation (PDA):** Generates realistic, physically plausible variations of electrochemical degradation patterns.
 
 ### 🚀 Key Performance Highlights
@@ -94,7 +93,7 @@ If you find this code or our paper useful in your research, please consider citi
 ```bibtex
 @article{jung2025physics,
   title={Physics-informed neural network and momentum contrastive learning for battery state of health estimation},
-  author={Jung, Jiwoo and Bassole, Yipene Cedric Francois and Sung, Yunsick},
+  author={Jung Jiwoo, and Bassole Yipene Cedric Francois and, Sung Yunsick},
   journal={Complex \& Intelligent Systems},
   volume={12},
   number={73},
